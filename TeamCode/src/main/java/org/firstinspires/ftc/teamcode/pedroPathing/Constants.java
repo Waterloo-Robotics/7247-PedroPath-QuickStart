@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(5)
-            .forwardZeroPowerAcceleration(-54.22)
-            .lateralZeroPowerAcceleration(-60.50)
+            .forwardZeroPowerAcceleration(-39.68)
+            .lateralZeroPowerAcceleration(-68.30)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0.0001, 0.01,0))
             .headingPIDFCoefficients(new PIDFCoefficients(2,0,0.1,0))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04,0,0,0.6,0))
@@ -56,15 +56,15 @@ public class Constants {
             .leftRearMotorName("backLeft")
             .leftFrontMotorName("frontLeft")
             .leftFrontMotorDirection(DcMotor.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotor.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotor.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotor.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotor.Direction.FORWARD)
-            .yVelocity(74.39)
-            .xVelocity(84.88);
+            .rightRearMotorDirection(DcMotor.Direction.REVERSE)
+            .yVelocity(65.23)
+            .xVelocity(78.32);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-                    .forwardPodY(-0.984252)
-                    .strafePodX(6.10236)
+                    .forwardPodY(3.937)
+                    .strafePodX(2.3622)
                     .distanceUnit(DistanceUnit.INCH)
                     .hardwareMapName("pinpoint")
                     .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
