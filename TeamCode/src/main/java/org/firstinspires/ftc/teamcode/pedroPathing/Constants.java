@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -70,4 +71,24 @@ public class Constants {
                     .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
                     .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
                     .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+
+    public static class Hardware {
+        public Servo hood;
+        public DcMotor flywheel;
+        public DcMotor intake;
+        public DcMotor transfer;
+
+        public void init(HardwareMap hwMap) {
+            hood = hwMap.get(Servo.class, "hood");
+            flywheel = hwMap.get(DcMotor.class, "flywheel");
+            intake = hwMap.get(DcMotor.class, "intake");
+            transfer = hwMap.get(DcMotor.class, "transfer");
+        }
+
+
+
+
+    }
+
+
 }
