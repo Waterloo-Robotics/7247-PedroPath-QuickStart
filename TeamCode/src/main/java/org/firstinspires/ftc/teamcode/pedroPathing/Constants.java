@@ -10,6 +10,7 @@ import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -24,6 +25,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.LimelightProcessingModule;
+import org.firstinspires.ftc.teamcode.Table2D;
+import org.firstinspires.ftc.teamcode.flywheelModule;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -77,13 +81,33 @@ public class Constants {
         public DcMotor flywheel;
         public DcMotor intake;
         public DcMotor transfer;
+        float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
+        private float[] flywheel_speed = {2650, 2900, 3000, 3100, 3150, 3270, 3300, 3250, 3350, 4000,4000};
+        private float[] hood_angle = { (float)0.75, (float)0.75, (float)0.75, (float)0.75, (float)0.75,(float)0.75,(float)0.75,(float)0.75,(float)0.65,(float)0.55, (float)0.50};
+        private Table2D flywheel_speed_table = new Table2D(distance, flywheel_speed);
+        private Table2D hood_angle_table = new Table2D(distance, hood_angle);
+        boolean AutoTargeting;
 
-        public void init(HardwareMap hwMap) {
-            hood = hwMap.get(Servo.class, "hood");
-            flywheel = hwMap.get(DcMotor.class, "flywheel");
-            intake = hwMap.get(DcMotor.class, "intake");
-            transfer = hwMap.get(DcMotor.class, "transfer");
+        public void init(HardwareMap hardwareMap) {
+            flywheel = hardwareMap.get(DcMotor.class, "flywheel");
+            intake = hardwareMap.get(DcMotor.class, "intake");
+            transfer = hardwareMap.get(DcMotor.class, "transfer");
+            limelight = hardwareMap.get(Limelight3A.class, "limelight");
+            hood = hardwareMap.get(Servo.class, "hood");
+
+
+            flywheel.setDirection(DcMotor.Direction.REVERSE);
         }
+
+        /* ---------- Modules & Sensors ---------- */
+        private flywheelModule flywheelControl;
+        private Limelight3A limelight;
+        private LimelightProcessingModule llModule;
+
+        /* ---------- Variables ---------- */
+        private double hoodPosition = 0.4; // start in mid position
+        private double flywheelRPM;
+
 
 
 

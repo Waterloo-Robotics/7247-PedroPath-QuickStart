@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
-import static java.lang.Thread.sleep;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -9,24 +7,51 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
-
-
 
 @Autonomous(name = "Auto", group = "Examples")
 public class TestautoMeetTwo extends OpMode {
+
+
+
+    public Servo hood;
+    public DcMotor flywheel;
+    public DcMotor intake;
+    public DcMotor transfer;
+    float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
+    private float[] flywheel_speed = {2650, 2900, 3000, 3100, 3150, 3270, 3300, 3250, 3350, 4000,4000};
+    private float[] hood_angle = { (float)0.75, (float)0.75, (float)0.75, (float)0.75, (float)0.75,(float)0.75,(float)0.75,(float)0.75,(float)0.65,(float)0.55, (float)0.50};
+    private Table2D flywheel_speed_table = new Table2D(distance, flywheel_speed);
+    private Table2D hood_angle_table = new Table2D(distance, hood_angle);
+    boolean AutoTargeting;
+
+
+    /* ---------- Modules & Sensors ---------- */
+    private flywheelModule flywheelControl;
+    private Limelight3A limelight;
+    private LimelightProcessingModule llModule;
+
+    /* ---------- Variables ---------- */
+    private double hoodPosition = 0.4; // start in mid position
+    private double flywheelRPM;
+
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     int counter;
     private final Pose startPose = new Pose(120, 121, Math.toRadians(35)); // Start Pose of our robot.
     private final Pose score1 = new Pose(96, 96, Math.toRadians(45));
-    private final Pose pickupstart = new Pose(96,53, Math.toRadians(0));
-    private final Pose pickupend = new Pose(110,53, Math.toRadians(0));
+    private final Pose pickupstart = new Pose(96, 53, Math.toRadians(0));
+    private final Pose pickupend = new Pose(110, 53, Math.toRadians(0));
     private final Pose score2 = new Pose(96, 96, Math.toRadians(45));
     private final Pose endPose = new Pose(85, 48, Math.toRadians(90));// park Pose of our robot.
     private Follower follower;
@@ -100,8 +125,10 @@ public class TestautoMeetTwo extends OpMode {
 
                 break;
             case 3:
+
+                flywheelRPM = 3000;
                 counter = counter + 1;
-                if(counter == 60) {
+                if (counter == 200) {
                     follower.followPath(pickupmotifend, true);
                     setPathState(4);
                 }
@@ -148,12 +175,44 @@ public class TestautoMeetTwo extends OpMode {
         autonomousPathUpdate();
 
 
+
+
+        float rpm = 0;
+        float angle = 1;
+        boolean limelight_available = false;
+
+        Pose2D pose = llModule.limelightResult();
+
+        float limelight_distance = 0;
+        if (pose != null) {
+            limelight_distance = (float) (1.75*(float) -pose.getX(DistanceUnit.INCH));
+
+            if (limelight_distance < 81 || limelight_distance > 124) {
+                limelight_available = true;
+            }
+
+            rpm =  (flywheel_speed_table.Lookup(limelight_distance));
+            angle = hood_angle_table.Lookup(limelight_distance);
+        }
+
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
+        /* ---------------- LIMELIGHT TELEMETRY ---------------- */
+
+
+        if (pose != null) {
+            telemetry.addData("X (inches)", pose.getX(DistanceUnit.INCH));
+            telemetry.addData("Y (inches)", pose.getY(DistanceUnit.INCH));
+            telemetry.addData("Rotation (degrees)", pose.getHeading(AngleUnit.DEGREES));
+        } else {
+            telemetry.addData("Limelight", "No valid target");
+        }
+
+
     }
 
     /**
@@ -161,6 +220,23 @@ public class TestautoMeetTwo extends OpMode {
      **/
     @Override
     public void init() {
+
+
+
+
+
+
+
+        flywheel = hardwareMap.get(DcMotor.class, "flywheel");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        transfer = hardwareMap.get(DcMotor.class, "transfer");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        hood = hardwareMap.get(Servo.class, "hood");
+
+
+
+
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -170,6 +246,17 @@ public class TestautoMeetTwo extends OpMode {
 
         buildPaths();
         follower.setStartingPose(startPose);
+
+        // Modules
+        flywheelControl = new flywheelModule(flywheel);
+        flywheelRPM = 0;
+
+        llModule = new LimelightProcessingModule(limelight, telemetry);
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        flywheel.setDirection(DcMotor.Direction.REVERSE);
 
 
     }
