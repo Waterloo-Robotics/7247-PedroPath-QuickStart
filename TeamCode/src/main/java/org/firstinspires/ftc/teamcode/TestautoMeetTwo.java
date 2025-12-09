@@ -257,6 +257,14 @@ public class TestautoMeetTwo extends OpMode {
         telemetry.update();
 
         flywheel.setDirection(DcMotor.Direction.REVERSE);
+        hood.setPosition(hoodPosition);
+        flywheelControl.set_speed((int) flywheelRPM);
+
+        double intakePower = 0.0;
+        double transferPower = 0.0;
+
+        intake.setPower(intakePower);
+        transfer.setPower(transferPower);
 
 
     }

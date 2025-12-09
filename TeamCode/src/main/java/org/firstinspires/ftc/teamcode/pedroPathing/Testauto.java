@@ -1,15 +1,13 @@
-package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.pedroPathing; // make sure this aligns with class location
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -17,7 +15,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.LimelightProcessingModule;
+import org.firstinspires.ftc.teamcode.Table2D;
+import org.firstinspires.ftc.teamcode.flywheelModule;
 
 @Autonomous(name = "test auto", group = "Examples")
 public class Testauto extends OpMode {
@@ -44,6 +44,9 @@ public class Testauto extends OpMode {
     /* ---------- Variables ---------- */
     private double hoodPosition = 0.4; // start in mid position
     private double flywheelRPM;
+    private double transferPower;
+    private double intakePower;
+
 
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
@@ -57,6 +60,7 @@ public class Testauto extends OpMode {
     private Follower follower;
     private Path scorePreload;
     private PathChain pickupmotifstart, pickupmotifend, score2path, park;
+
 
 
     public void buildPaths() {
@@ -93,8 +97,11 @@ public class Testauto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                flywheelRPM = 3500;
+                hoodPosition = 0.725;
                 follower.followPath(scorePreload);
-                flywheelRPM = 3000;
+
+
 
                 setPathState(1);
                 break;
@@ -105,6 +112,18 @@ public class Testauto extends OpMode {
             - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
             - Robot Position: "if(follower.getPose().getX() > 36) {}"
             */
+
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (!follower.isBusy()) {
+                    transferPower = 1.0;
+                    intakePower = 1.0;
+                    follower.followPath(pickupmotifstart, true);
+                    flywheelRPM = 3500;
+                    setPathState(2);
+                }
+
+                break;
+
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
 
@@ -132,14 +151,18 @@ public class Testauto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-
-
-
         float rpm = 0;
         float angle = 1;
         boolean limelight_available = false;
 
         Pose2D pose = llModule.limelightResult();
+        hood.setPosition(hoodPosition);
+        flywheelControl.set_speed((int) flywheelRPM);
+        double intakePower = 0.0;
+        double transferPower = 0.0;
+
+        intake.setPower(intakePower);
+        transfer.setPower(transferPower);
 
         float limelight_distance = 0;
         if (pose != null) {
@@ -169,6 +192,7 @@ public class Testauto extends OpMode {
         } else {
             telemetry.addData("Limelight", "No valid target");
         }
+
 
 
     }
