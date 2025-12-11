@@ -4,12 +4,10 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -19,10 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Auto", group = "Examples")
-public class TestautoMeetTwo extends OpMode {
-
-
+@Autonomous(name = "ScoreRED", group = "Examples")
+public class ScoreRED extends OpMode {
 
     public Servo hood;
     public DcMotor flywheel;
@@ -44,29 +40,72 @@ public class TestautoMeetTwo extends OpMode {
     /* ---------- Variables ---------- */
     private double hoodPosition;
     private double flywheelRPM;
+    private double transferPower;
+    private double intakePower;
+    private boolean callbackran = false;
+
 
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     int counter;
     private final Pose startPose = new Pose(120, 121, Math.toRadians(35)); // Start Pose of our robot.
     private final Pose score1 = new Pose(96, 96, Math.toRadians(45));
+    private final Pose shoot = new Pose(96, 96, Math.toRadians(45));
     private final Pose pickupstart = new Pose(96, 53, Math.toRadians(0));
     private final Pose pickupend = new Pose(110, 53, Math.toRadians(0));
     private final Pose score2 = new Pose(96, 96, Math.toRadians(45));
     private final Pose endPose = new Pose(85, 48, Math.toRadians(90));// park Pose of our robot.
     private Follower follower;
-    private Path scorePreload;
-    private PathChain pickupmotifstart, pickupmotifend, score2path, park;
+    private Path scorePreloadmove;
+    private PathChain shootpreload, pickupmotifstart, pickupmotifend, score2move, park;
+
+
+    public void flywheel_on(){
+        flywheelRPM = 3500;
+    }
+
+    public void flywheel_off(){
+        flywheelRPM = 0;
+    }
+
+    public void intake_on(){
+        intakePower = 1.0;
+    }
+
+    public void intake_off(){
+        intakePower = 0;
+    }
+
+    public void transfer_on(){
+        transferPower = - 1.0;
+    }
+
+    public void transfer_off(){
+        transferPower = 0;
+    }
+
+    public void setCallbackran(){
+        callbackran = true;
+    }
+
 
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(startPose, score1));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
+        scorePreloadmove = new Path(new BezierLine(startPose, score1));
+        scorePreloadmove.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
+
+        shootpreload = follower.pathBuilder()
+                .addPath(new BezierLine(score1, shoot))
+                .addTemporalCallback(1,()->{transfer_on();})
+                .addTemporalCallback(1,()->{intake_on();})
+                .addTemporalCallback(0, () -> {callbackran=true;})
+                .setLinearHeadingInterpolation(score1.getHeading(), shoot.getHeading())
+                .build();
 
         pickupmotifstart = follower.pathBuilder()
-                .addPath(new BezierLine(score1, pickupstart))
-                .setLinearHeadingInterpolation(score1.getHeading(), pickupstart.getHeading())
+                .addPath(new BezierLine(shoot, pickupstart))
+                .setLinearHeadingInterpolation(shoot.getHeading(), pickupstart.getHeading())
                 .build();
 
         pickupmotifend = follower.pathBuilder()
@@ -74,15 +113,10 @@ public class TestautoMeetTwo extends OpMode {
                 .setLinearHeadingInterpolation(pickupstart.getHeading(), pickupend.getHeading())
                 .build();
 
-        score2path = follower.pathBuilder()
+
+        score2move = follower.pathBuilder()
                 .addPath(new BezierLine(pickupend, score2))
                 .setLinearHeadingInterpolation(pickupend.getHeading(), score2.getHeading())
-                .build();
-
-
-        park = follower.pathBuilder()
-                .addPath(new BezierLine(score2, endPose))
-                .setLinearHeadingInterpolation(score2.getHeading(), endPose.getHeading())
                 .build();
 
     /* Here is an example for Constant Interpolation
@@ -93,7 +127,10 @@ public class TestautoMeetTwo extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
+                follower.followPath(scorePreloadmove);
+
+
+
                 setPathState(1);
                 break;
             case 1:
@@ -106,51 +143,17 @@ public class TestautoMeetTwo extends OpMode {
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy()) {
-                    /* Score Preload */
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(park, true);
+                    follower.followPath(shootpreload, true);
                     setPathState(2);
                 }
 
                 break;
 
-            case 2:
 
-                if (!follower.isBusy()) {
-                    follower.followPath(pickupmotifstart, true);
+            /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
 
-                    setPathState(3);
-                }
 
-                break;
-            case 3:
-
-                flywheelRPM = 3000;
-                counter = counter + 1;
-                if (counter == 200) {
-                    follower.followPath(pickupmotifend, true);
-                    setPathState(4);
-                }
-
-                break;
-
-            case 4:
-
-                if (!follower.isBusy()) {
-                    follower.followPath(score2path, true);
-                    setPathState(5);
-                }
-
-                break;
-            case 5:
-
-                if (!follower.isBusy()) {
-                    follower.followPath(park, true);
-                    setPathState(6);
-                }
-
-                break;
 
 
         }
@@ -174,14 +177,16 @@ public class TestautoMeetTwo extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-
-
-
         float rpm = 0;
         float angle = 1;
         boolean limelight_available = false;
 
         Pose2D pose = llModule.limelightResult();
+        hood.setPosition(hoodPosition);
+        flywheelControl.set_speed((int) flywheelRPM);
+
+        intake.setPower(intakePower);
+        transfer.setPower(transferPower);
 
         float limelight_distance = 0;
         if (pose != null) {
@@ -200,7 +205,6 @@ public class TestautoMeetTwo extends OpMode {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
 
 
@@ -212,6 +216,15 @@ public class TestautoMeetTwo extends OpMode {
             telemetry.addData("Limelight", "No valid target");
         }
 
+        /* ---------------- GENERAL TELEMETRY ---------------- */
+        telemetry.addData("Flywheel RPM", flywheelRPM);
+        telemetry.addData("Hood Position", hoodPosition);
+        telemetry.addData("Motor Speed", flywheelControl.motor_speed_rpm);
+        telemetry.addData("Hood Pos", hood.getPosition());
+        telemetry.addData("Intake Power", intakePower);
+        telemetry.addData("Transfer Power", transferPower);
+        telemetry.addData("callback run", callbackran);
+        telemetry.update();
 
 
 
@@ -259,14 +272,6 @@ public class TestautoMeetTwo extends OpMode {
         telemetry.update();
 
         flywheel.setDirection(DcMotor.Direction.REVERSE);
-        hood.setPosition(hoodPosition);
-        flywheelControl.set_speed((int) flywheelRPM);
-
-        double intakePower = 0.0;
-        double transferPower = 0.0;
-
-        intake.setPower(intakePower);
-        transfer.setPower(transferPower);
 
 
     }

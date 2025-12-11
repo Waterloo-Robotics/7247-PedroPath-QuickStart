@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -15,14 +15,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.LimelightProcessingModule;
-import org.firstinspires.ftc.teamcode.Table2D;
-import org.firstinspires.ftc.teamcode.flywheelModule;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "test auto", group = "Examples")
-public class Testauto extends OpMode {
-
-
+@Autonomous(name = "test auto2", group = "Examples")
+public class testauto2 extends OpMode {
 
     public Servo hood;
     public DcMotor flywheel;
@@ -42,10 +38,11 @@ public class Testauto extends OpMode {
     private LimelightProcessingModule llModule;
 
     /* ---------- Variables ---------- */
-    private double hoodPosition = 0.4; // start in mid position
+    private double hoodPosition;
     private double flywheelRPM;
     private double transferPower;
     private double intakePower;
+    private boolean callbackran = false;
 
 
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -53,40 +50,73 @@ public class Testauto extends OpMode {
     int counter;
     private final Pose startPose = new Pose(120, 121, Math.toRadians(35)); // Start Pose of our robot.
     private final Pose score1 = new Pose(96, 96, Math.toRadians(45));
+    private final Pose shootstart = new Pose(96, 96, Math.toRadians(45));
+    private final Pose shootend = new Pose(96, 96, Math.toRadians(45));
     private final Pose pickupstart = new Pose(96, 53, Math.toRadians(0));
     private final Pose pickupend = new Pose(110, 53, Math.toRadians(0));
     private final Pose score2 = new Pose(96, 96, Math.toRadians(45));
     private final Pose endPose = new Pose(85, 48, Math.toRadians(90));// park Pose of our robot.
     private Follower follower;
-    private Path scorePreload;
-    private PathChain pickupmotifstart, pickupmotifend, score2path, park;
+    private Path scorePreloadmove;
+    private PathChain  shooterstart, shoot, pickupmotifstart, pickupmotifend, score2move, park;
+
+
+    public void flywheel_on(){
+        flywheelRPM = 3500;
+    }
+
+    public void flywheel_off(){
+        flywheelRPM = 0;
+    }
+
+    public void intake_on(){
+        intakePower = 1.0;
+    }
+
+    public void intake_off(){
+        intakePower = 0;
+    }
+
+    public void transfer_on(){
+        transferPower = - 1.0;
+    }
+
+    public void transfer_off(){
+        transferPower = 0;
+    }
+
+    public void setCallbackran(){
+        callbackran = true;
+    }
 
 
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(startPose, score1));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
+        scorePreloadmove = new Path(new BezierLine(startPose, score1));
+        scorePreloadmove.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
+
+        shooterstart = follower.pathBuilder()
+                .addPath(new BezierLine(score1, shootstart))
+                .addTemporalCallback(0,()->{transfer_on();})
+                .addTemporalCallback(0,()->{intake_on();})
+                .setLinearHeadingInterpolation(score1.getHeading(), shootstart.getHeading())
+                .build();
+
+        shoot = follower.pathBuilder()
+                .addPath(new BezierLine(shootstart, shootend))
+                .setLinearHeadingInterpolation(shootstart.getHeading(), shootend.getHeading())
+                .build();
 
         pickupmotifstart = follower.pathBuilder()
-                .addPath(new BezierLine(score1, pickupstart))
-                .setLinearHeadingInterpolation(score1.getHeading(), pickupstart.getHeading())
+                .addPath(new BezierLine(shootend, pickupstart))
+                .setLinearHeadingInterpolation(shootend.getHeading(), pickupstart.getHeading())
                 .build();
+
 
         pickupmotifend = follower.pathBuilder()
                 .addPath(new BezierLine(pickupstart, pickupend))
                 .setLinearHeadingInterpolation(pickupstart.getHeading(), pickupend.getHeading())
-                .build();
-
-        score2path = follower.pathBuilder()
-                .addPath(new BezierLine(pickupend, score2))
-                .setLinearHeadingInterpolation(pickupend.getHeading(), score2.getHeading())
-                .build();
-
-
-        park = follower.pathBuilder()
-                .addPath(new BezierLine(score2, endPose))
-                .setLinearHeadingInterpolation(score2.getHeading(), endPose.getHeading())
                 .build();
 
     /* Here is an example for Constant Interpolation
@@ -97,9 +127,8 @@ public class Testauto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                follower.followPath(scorePreloadmove);
                 flywheelRPM = 3500;
-                hoodPosition = 0.725;
-                follower.followPath(scorePreload);
 
 
 
@@ -107,26 +136,25 @@ public class Testauto extends OpMode {
                 break;
             case 1:
 
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
 
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy()) {
-                    transferPower = 1.0;
-                    intakePower = 1.0;
-                    follower.followPath(pickupmotifstart, true);
-                    flywheelRPM = 3500;
+
+                    follower.followPath(shooterstart, true);
                     setPathState(2);
                 }
 
                 break;
 
+            case 2:
 
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
 
+                if (!follower.isBusy()) {
+
+                    follower.followPath(shoot, true);
+                    setPathState(3);
+                }
+
+                break;
 
 
 
@@ -158,8 +186,6 @@ public class Testauto extends OpMode {
         Pose2D pose = llModule.limelightResult();
         hood.setPosition(hoodPosition);
         flywheelControl.set_speed((int) flywheelRPM);
-        double intakePower = 0.0;
-        double transferPower = 0.0;
 
         intake.setPower(intakePower);
         transfer.setPower(transferPower);
@@ -181,7 +207,6 @@ public class Testauto extends OpMode {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
 
 
@@ -192,6 +217,16 @@ public class Testauto extends OpMode {
         } else {
             telemetry.addData("Limelight", "No valid target");
         }
+
+        /* ---------------- GENERAL TELEMETRY ---------------- */
+        telemetry.addData("Flywheel RPM", flywheelRPM);
+        telemetry.addData("Hood Position", hoodPosition);
+        telemetry.addData("Motor Speed", flywheelControl.motor_speed_rpm);
+        telemetry.addData("Hood Pos", hood.getPosition());
+        telemetry.addData("Intake Power", intakePower);
+        telemetry.addData("Transfer Power", transferPower);
+        telemetry.addData("callback run", callbackran);
+        telemetry.update();
 
 
 
