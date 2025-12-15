@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Score RED CLOSE", group = "Examples")
-public class ScoreRED extends OpMode {
+public class ScoreREDFAR extends OpMode {
 
     public Servo hood;
     public DcMotor flywheel;
@@ -48,13 +48,13 @@ public class ScoreRED extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     int counter;
-    private final Pose startPose = new Pose(120, 121, Math.toRadians(35)); // Start Pose of our robot.
-    private final Pose score1 = new Pose(96, 96, Math.toRadians(45));
-    private final Pose shoot = new Pose(96, 96, Math.toRadians(45));
-    private final Pose pickupstart = new Pose(96, 53, Math.toRadians(0));
-    private final Pose pickupend = new Pose(110, 53, Math.toRadians(0));
-    private final Pose score2 = new Pose(96, 96, Math.toRadians(45));
-    private final Pose endPose = new Pose(85, 48, Math.toRadians(90));// park Pose of our robot.
+    private final Pose startPose = new Pose(90, 9, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose score1 = new Pose(80, 12, Math.toRadians(45));
+    private final Pose shoot = new Pose(80,12, Math.toRadians(45));
+    private final Pose pickupstart = new Pose(111, 36, Math.toRadians(0));
+    private final Pose pickupend = new Pose(129, 36, Math.toRadians(0));
+    private final Pose score2 = new Pose(80, 12, Math.toRadians(45));
+    private final Pose endPose = new Pose(84, 30, Math.toRadians(90));// park Pose of our robot.
     private Follower follower;
     private Path scorePreloadmove;
     private PathChain shootpreload, pickupmotifstart, pickupmotifend, score2move, score2shoot, park;
@@ -145,7 +145,7 @@ public class ScoreRED extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreloadmove);
-                flywheelRPM = 3500;
+                flywheelRPM = 4500;
 
                 setPathState(1);
                 break;
@@ -179,7 +179,7 @@ public class ScoreRED extends OpMode {
 
                     follower.followPath(score2move, true);
 
-                    flywheelRPM = 3500;
+                    flywheelRPM = 4500;
                     setPathState(5);
                 }
 
