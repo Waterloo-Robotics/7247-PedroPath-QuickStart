@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Score RED CLOSE", group = "Examples")
+@Autonomous(name = "Score RED FAR", group = "Examples")
 public class ScoreREDFAR extends OpMode {
 
     public Servo hood;

@@ -50,14 +50,13 @@ public class ScoreRED extends OpMode {
     int counter;
     private final Pose startPose = new Pose(120, 121, Math.toRadians(35)); // Start Pose of our robot.
     private final Pose score1 = new Pose(96, 96, Math.toRadians(45));
-    private final Pose shoot = new Pose(96, 96, Math.toRadians(45));
     private final Pose pickupstart = new Pose(96, 53, Math.toRadians(0));
     private final Pose pickupend = new Pose(110, 53, Math.toRadians(0));
     private final Pose score2 = new Pose(96, 96, Math.toRadians(45));
     private final Pose endPose = new Pose(85, 48, Math.toRadians(90));// park Pose of our robot.
     private Follower follower;
     private Path scorePreloadmove;
-    private PathChain shootpreload, pickupmotifstart, pickupmotifend, score2move, score2shoot, park;
+    private PathChain pickupmotifstart, pickupmotifend, score2move, score2shoot, park;
 
 
     public void flywheel_on(){
@@ -95,19 +94,10 @@ public class ScoreRED extends OpMode {
         scorePreloadmove = new Path(new BezierLine(startPose, score1));
         scorePreloadmove.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
 
-        shootpreload = follower.pathBuilder()
-                .addPath(new BezierLine(score1, shoot))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .addTemporalCallback(0, () -> {callbackran=true;})
-                .setLinearHeadingInterpolation(score1.getHeading(), shoot.getHeading())
-                .build();
 
         pickupmotifstart = follower.pathBuilder()
-                .addPath(new BezierLine(shoot, pickupstart))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .setLinearHeadingInterpolation(shoot.getHeading(), pickupstart.getHeading())
+                .addPath(new BezierLine(score1, pickupstart))
+                .setLinearHeadingInterpolation(score1.getHeading(), pickupstart.getHeading())
                 .build();
 
         pickupmotifend = follower.pathBuilder()
@@ -118,22 +108,13 @@ public class ScoreRED extends OpMode {
 
         score2move = follower.pathBuilder()
                 .addPath(new BezierLine(pickupend, score2))
-                .addTemporalCallback(1,()->{transfer_off();})
-                .addTemporalCallback(1,()->{intake_off();})
                 .setLinearHeadingInterpolation(pickupend.getHeading(), score2.getHeading())
                 .build();
 
-        score2shoot = follower.pathBuilder()
-                .addPath(new BezierLine(score2, shoot))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .setLinearHeadingInterpolation(score2.getHeading(), shoot.getHeading())
-                .build();
+
         park = follower.pathBuilder()
-                .addPath(new BezierLine(shoot, endPose))
-                .addTemporalCallback(1,()->{transfer_off();})
-                .addTemporalCallback(1,()->{intake_off();})
-                .setLinearHeadingInterpolation(shoot.getHeading(), endPose.getHeading())
+                .addPath(new BezierLine(score2, endPose))
+                .setLinearHeadingInterpolation(score2.getHeading(), endPose.getHeading())
                 .build();
 
     /* Here is an example for Constant Interpolation
@@ -144,22 +125,22 @@ public class ScoreRED extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreloadmove);
-                flywheelRPM = 3500;
-
-                setPathState(1);
+                if(!follower.isBusy()) {
+                    follower.followPath(scorePreloadmove);
+                    setPathState(1);
+                }
                 break;
             case 1:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(shootpreload, true);
+                if(counter+1 == 20){
+                    flywheel_on();
                     setPathState(2);
+
+
                 }
 
                 break;
             case 2:
                 if (!follower.isBusy()) {
-                    flywheelRPM = 0;
                     follower.followPath(pickupmotifstart, true);
                     setPathState(3);
                 }
@@ -179,7 +160,6 @@ public class ScoreRED extends OpMode {
 
                     follower.followPath(score2move, true);
 
-                    flywheelRPM = 3500;
                     setPathState(5);
                 }
 
@@ -189,7 +169,6 @@ public class ScoreRED extends OpMode {
 
                     follower.followPath(score2shoot, true);
 
-                    flywheelRPM = 0;
                     setPathState(6);
                 }
 
@@ -199,7 +178,6 @@ public class ScoreRED extends OpMode {
 
                     follower.followPath(park, true);
 
-                    flywheelRPM = 0;
                     setPathState(7);
                 }
 
