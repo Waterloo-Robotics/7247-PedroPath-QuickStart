@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
+import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Score RED CLOSE", group = "Examples")
@@ -166,7 +168,7 @@ public class ScoreRED extends OpMode {
 
                 follower.resumePathFollowing();
                 if (!follower.isBusy()) {
-1                    flywheelRPM = 0;
+                   flywheelRPM = 0;
                     follower.followPath(pickupmotifstart, true);
                     setPathState(3);
                 }

@@ -6,44 +6,29 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
-import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.LimelightProcessingModule;
+import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
 import org.firstinspires.ftc.teamcode.Table2D;
-import org.firstinspires.ftc.teamcode.flywheelModule;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(5)
-            .forwardZeroPowerAcceleration(-39.68)
-            .lateralZeroPowerAcceleration(-68.30)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0.0001, 0.01,0))
-            .headingPIDFCoefficients(new PIDFCoefficients(2,0,0.1,0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04,0,0,0.6,0))
-            .centripetalScaling(0.001);
+            .mass(1.535)
+            .lateralZeroPowerAcceleration(-81.67)
+            .forwardZeroPowerAcceleration(-43.44)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.031, 0.05))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.9,0,0.3,0.15))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.25,0,0.00001,0.6,0.01))
+            .centripetalScaling(0.0000001);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
     public static Follower createFollower(HardwareMap hardwareMap) {
@@ -61,15 +46,15 @@ public class Constants {
             .leftRearMotorName("backLeft")
             .leftFrontMotorName("frontLeft")
             .leftFrontMotorDirection(DcMotor.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotor.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotor.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotor.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotor.Direction.REVERSE)
-            .yVelocity(65.23)
-            .xVelocity(78.32);
+            .rightRearMotorDirection(DcMotor.Direction.FORWARD)
+            .xVelocity(72.27)
+            .yVelocity(55.33);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-                    .forwardPodY(3.937)
-                    .strafePodX(2.3622)
+                    .forwardPodY(6.6318)
+                    .strafePodX(0)
                     .distanceUnit(DistanceUnit.INCH)
                     .hardwareMapName("pinpoint")
                     .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
