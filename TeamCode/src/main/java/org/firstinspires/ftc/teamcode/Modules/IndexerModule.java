@@ -42,7 +42,7 @@ public class IndexerModule {
         this.artifacts.add(this.artifact_1);
         this.artifacts.add(this.artifact_2);
         this.artifacts.add(this.artifact_3);
-        this.light1 = light1;
+//        this.light1 = light1;
     }
 
     public void update()
@@ -51,18 +51,18 @@ public class IndexerModule {
         this.artifact_2.update();
         this.artifact_3.update();
 
-        if (num_artifacts == 0) {
-            light1.setPosition(LEDOFF);
-        }
-        else if (num_artifacts == 1) {
-            light1.setPosition(GREENLED);
-        }
-        else if (num_artifacts == 2) {
-            light1.setPosition(YELLOWLED);
-        }
-        else if (num_artifacts == 3) {
-            light1.setPosition(REDLED);
-        }
+//        if (num_artifacts == 0) {
+//            light1.setPosition(LEDOFF);
+//        }
+//        else if (num_artifacts == 1) {
+//            light1.setPosition(GREENLED);
+//        }
+//        else if (num_artifacts == 2) {
+//            light1.setPosition(YELLOWLED);
+//        }
+//        else if (num_artifacts == 3) {
+//            light1.setPosition(REDLED);
+//        }
         /* Recount the number of artifacts currently in the indexer */
         this.num_artifacts = 0;
         for (IndexerSpot spot : this.artifacts)

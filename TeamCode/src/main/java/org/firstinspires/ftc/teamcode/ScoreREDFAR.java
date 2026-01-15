@@ -6,7 +6,10 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,129 +18,149 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Modules.IndexerModule;
 import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
+import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Score RED FAR", group = "Examples")
+@Autonomous(name = "SCORE RED FAR", group = "Examples")
 public class ScoreREDFAR extends OpMode {
-
-    public Servo hood;
-    public DcMotor flywheel;
-    public DcMotor intake;
-    public DcMotor transfer;
-    float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
-    private float[] flywheel_speed = {2650, 2900, 3000, 3100, 3150, 3270, 3300, 3250, 3350, 4000,4000};
-    private float[] hood_angle = { (float)0.75, (float)0.75, (float)0.75, (float)0.75, (float)0.75,(float)0.75,(float)0.75,(float)0.75,(float)0.65,(float)0.55, (float)0.50};
-    private Table2D flywheel_speed_table = new Table2D(distance, flywheel_speed);
-    private Table2D hood_angle_table = new Table2D(distance, hood_angle);
-    boolean AutoTargeting;
-
-
-    /* ---------- Modules & Sensors ---------- */
+    private DcMotor backIntake;
+    private DcMotor frontIntake;
+    private DcMotor turretRotation;
+    private DcMotor flywheel;
+    private Servo ball1;
+    private Servo ball2;
+    private Servo ball3;
+    private Servo hood;
+    private Servo linearServo;
+    private RevColorSensorV3 color1a;
+    private RevColorSensorV3 color1b;
+    private RevColorSensorV3 color2a;
+    private RevColorSensorV3 color2b;
+    private RevColorSensorV3 color3a;
+    private RevColorSensorV3 color3b;
     private flywheelModule flywheelControl;
     private Limelight3A limelight;
     private LimelightProcessingModule llModule;
+    private IndexerModule indexerModule;
+    private float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
+    private float[] flywheel_speed = {2700, 3000, 3000, 3000, 3300, 3200, 3300, 3500, 3350, 4000,4000};
+    private float[] hood_angle = { (float)0.67, (float)0.4, (float)0.4, (float)0.4, (float)0.2,(float)0.0,(float)0.0,(float)0.0,(float)0.65,(float)0.55, (float)0.50};
+    private org.firstinspires.ftc.teamcode.Modules.Table2D flywheel_speed_table = new org.firstinspires.ftc.teamcode.Modules.Table2D(distance, flywheel_speed);
+    private org.firstinspires.ftc.teamcode.Modules.Table2D hood_angle_table = new Table2D(distance, hood_angle);
+    boolean AutoTargeting;
+    GoBildaPinpointDriver pinpoint;
+
 
     /* ---------- Variables ---------- */
     private double hoodPosition;
     private double flywheelRPM;
-    private double transferPower;
-    private double intakePower;
+    double frontintakePower;
+    double backintakePower;
     private boolean callbackran = false;
 
 
     private Timer pathTimer, actionTimer, opmodeTimer;
-    private int pathState;
+    private int pathState = -1;
     int counter;
-    private final Pose startPose = new Pose(90, 9, Math.toRadians(90)); // Start Pose of our robot.
-    private final Pose score1 = new Pose(80, 12, Math.toRadians(45));
-    private final Pose shoot = new Pose(80,12, Math.toRadians(45));
-    private final Pose pickupstart = new Pose(111, 36, Math.toRadians(0));
-    private final Pose pickupend = new Pose(129, 36, Math.toRadians(0));
-    private final Pose score2 = new Pose(80, 12, Math.toRadians(45));
-    private final Pose endPose = new Pose(84, 30, Math.toRadians(90));// park Pose of our robot.
-    private Follower follower;
-    private Path scorePreloadmove;
-    private PathChain shootpreload, pickupmotifstart, pickupmotifend, score2move, score2shoot, park;
+    private final Pose startPose = new Pose(88, 8, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose shoot1 = new Pose(83, 83, Math.toRadians(45));  // shooting preload
+    private final Pose pickup1start = new Pose(104, 35, Math.toRadians(0));  // pick up 1st row start
+    private final Pose pickup1end = new Pose(129, 35, Math.toRadians(0));  // picking up 1st row end
+    private final Pose shoot2stall = new Pose(85, 50, Math.toRadians(0));  // shooting preload
+    private final Pose shoot2 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
+    private final Pose pickup2start = new Pose(104, 60, Math.toRadians(0));  // pick up 1st row start
+    private final Pose pickup2end = new Pose(129, 60, Math.toRadians(0));  // picking up 1st row end
+    private final Pose shoot3stall = new Pose(84, 69, Math.toRadians(45));  // shooting preload
+    private final Pose shoot3 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
+    private final Pose pickup3start = new Pose(104, 83, Math.toRadians(0));  // pick up 1st row start
+    private final Pose pickup3end = new Pose(129, 83, Math.toRadians(0));  // picking up 1st row end
+    private final Pose shoot4 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
+    private final Pose end = new Pose(96, 24, Math.toRadians(45));  // shooting first row
+
+
 
 
     public void flywheel_on(){
         flywheelRPM = 3500;
     }
-
     public void flywheel_off(){
         flywheelRPM = 0;
     }
-
-    public void intake_on(){
-        intakePower = 1.0;
+    public void shooALL(){
+        indexerModule.shootAll();
     }
-
-    public void intake_off(){
-        intakePower = 0;
-    }
-
-    public void transfer_on(){
-        transferPower = - 1.0;
-    }
-
-    public void transfer_off(){
-        transferPower = 0;
-    }
-
+//    public void shooGREEN(){
+//        indexerModule.shootGreen();
+//    }
+//    public void shootPURPLE(){
+//        indexerModule.shootPurple();
+//    }
     public void setCallbackran(){
         callbackran = true;
     }
 
 
+    private Follower follower;
+    private Path shoot1Path;
+    private PathChain pickup1startPath,pickup1endPath,shoot2stallPath,shoot2Path,pickup2startPath,pickup2endPath,shoot3stallPath,shoot3Path,pickup3startPath,pickup3endPath,shoot4Path,endPath;
+
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreloadmove = new Path(new BezierLine(startPose, score1));
-        scorePreloadmove.setLinearHeadingInterpolation(startPose.getHeading(), score1.getHeading());
+        shoot1Path = new Path(new BezierLine(startPose, shoot1));
+        shoot1Path.setLinearHeadingInterpolation(startPose.getHeading(), shoot1.getHeading());
 
-        shootpreload = follower.pathBuilder()
-                .addPath(new BezierLine(score1, shoot))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .addTemporalCallback(0, () -> {callbackran=true;})
-                .setLinearHeadingInterpolation(score1.getHeading(), shoot.getHeading())
+        pickup1startPath = follower.pathBuilder()
+                .addPath(new BezierLine(shoot1, pickup1start))
+                .setLinearHeadingInterpolation(shoot1.getHeading(), pickup1start.getHeading())
                 .build();
-
-        pickupmotifstart = follower.pathBuilder()
-                .addPath(new BezierLine(shoot, pickupstart))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .setLinearHeadingInterpolation(shoot.getHeading(), pickupstart.getHeading())
+        pickup1endPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickup1start, pickup1end))
+                .setLinearHeadingInterpolation(pickup1start.getHeading(), pickup1end.getHeading())
                 .build();
-
-        pickupmotifend = follower.pathBuilder()
-                .addPath(new BezierLine(pickupstart, pickupend))
-                .setLinearHeadingInterpolation(pickupstart.getHeading(), pickupend.getHeading())
+        shoot2stallPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickup1end, shoot2stall))
+                .setLinearHeadingInterpolation(pickup1end.getHeading(), shoot2stall.getHeading())
                 .build();
-
-
-        score2move = follower.pathBuilder()
-                .addPath(new BezierLine(pickupend, score2))
-                .addTemporalCallback(1,()->{transfer_off();})
-                .addTemporalCallback(1,()->{intake_off();})
-                .setLinearHeadingInterpolation(pickupend.getHeading(), score2.getHeading())
+        shoot2Path = follower.pathBuilder()
+                .addPath(new BezierLine(shoot2stall, shoot2))
+                .setLinearHeadingInterpolation(shoot2stall.getHeading(), shoot2.getHeading())
                 .build();
-
-        score2shoot = follower.pathBuilder()
-                .addPath(new BezierLine(score2, shoot))
-                .addTemporalCallback(1,()->{transfer_on();})
-                .addTemporalCallback(1,()->{intake_on();})
-                .setLinearHeadingInterpolation(score2.getHeading(), shoot.getHeading())
+        pickup2startPath = follower.pathBuilder()
+                .addPath(new BezierLine(shoot2, pickup2start))
+                .setLinearHeadingInterpolation(shoot2.getHeading(), pickup2start.getHeading())
                 .build();
-        park = follower.pathBuilder()
-                .addPath(new BezierLine(shoot, endPose))
-                .addTemporalCallback(1,()->{transfer_off();})
-                .addTemporalCallback(1,()->{intake_off();})
-                .setLinearHeadingInterpolation(shoot.getHeading(), endPose.getHeading())
+        pickup2endPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2start, pickup2end))
+                .setLinearHeadingInterpolation(pickup2start.getHeading(), pickup2end.getHeading())
                 .build();
-
+        shoot3stallPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickup2end, shoot3stall))
+                .setLinearHeadingInterpolation(pickup2end.getHeading(), shoot3stall.getHeading())
+                .build();
+        shoot3Path = follower.pathBuilder()
+                .addPath(new BezierLine(shoot3stall, shoot3))
+                .setLinearHeadingInterpolation(shoot3stall.getHeading(), shoot3.getHeading())
+                .build();
+        pickup3startPath = follower.pathBuilder()
+                .addPath(new BezierLine(shoot3, pickup3start))
+                .setLinearHeadingInterpolation(shoot3.getHeading(), pickup3start.getHeading())
+                .build();
+        pickup3endPath = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3start, pickup3end))
+                .setLinearHeadingInterpolation(pickup3start.getHeading(), pickup3end.getHeading())
+                .build();
+        shoot4Path = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3end, shoot4))
+                .setLinearHeadingInterpolation(pickup3end.getHeading(), shoot4.getHeading())
+                .build();
+        endPath = follower.pathBuilder()
+                .addPath(new BezierLine(shoot4, end))
+                .setLinearHeadingInterpolation(shoot4.getHeading(), end.getHeading())
+                .build();
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
@@ -145,70 +168,106 @@ public class ScoreREDFAR extends OpMode {
 
     public void autonomousPathUpdate() {
         switch (pathState) {
+            case -1:
+                follower.followPath(shoot1Path);
+                flywheel_on();
+                setPathState(0);
+                break;
             case 0:
-                follower.followPath(scorePreloadmove);
-                flywheelRPM = 4500;
+                if(counter > 50){
+                    indexerModule.shootAll();
+                    setPathState(1);
+                }
 
-                setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && counter > 170) {
+                    follower.followPath(pickup1startPath);
+                    frontintakePower = 1;
 
-                    follower.followPath(shootpreload, true);
                     setPathState(2);
                 }
-
                 break;
-            case 2:
-                if (!follower.isBusy()) {
-                    flywheelRPM = 0;
-                    follower.followPath(pickupmotifstart, true);
-                    setPathState(3);
-                }
-
-                break;
-
-            case 3:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(pickupmotifend, true);
-                    setPathState(4);
-                }
-
-                break;
-            case 4:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(score2move, true);
-
-                    flywheelRPM = 4500;
-                    setPathState(5);
-                }
-
-                break;
-            case 5:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(score2shoot, true);
-
-                    flywheelRPM = 0;
-                    setPathState(6);
-                }
-
-                break;
-            case 6:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(park, true);
-
-                    flywheelRPM = 0;
-                    setPathState(7);
-                }
-
-                break;
-
-
-
+//
+//            case 2:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(pickup1endPath);
+//
+//                    setPathState(3);
+//                }
+//                break;
+//            case 3:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot2stallPath);
+//
+//                    setPathState(4);
+//                }
+//                break;
+//            case 4:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot2Path);
+//
+//                    setPathState(5);
+//                }
+//                break;
+//            case 5:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(pickup2startPath);
+//
+//                    setPathState(6);
+//                }
+//                break;
+//            case 6:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(pickup2endPath);
+//
+//                    setPathState(7);
+//                }
+//                break;
+//
+//            case 7:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot3stallPath);
+//
+//                    setPathState(8);
+//                }
+//                break;
+//            case 8:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot3Path);
+//
+//                    setPathState(9);
+//                }
+//                break;
+//            case 9:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(pickup3startPath);
+//
+//                    setPathState(10);
+//                }
+//                break;
+//            case 10:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(pickup3endPath);
+//
+//                    setPathState(11);
+//                }
+//                break;
+//            case 11:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot4Path);
+//
+//                    setPathState(12);
+//                }
+//                break;
+//            case 12:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(endPath);
+//                    flywheel_off();
+//
+//                    setPathState(13);
+//                }
+//                break;
 
 
         }
@@ -219,7 +278,6 @@ public class ScoreREDFAR extends OpMode {
      **/
     public void setPathState(int pState) {
         pathState = pState;
-        pathTimer.resetTimer();
     }
 
     /**
@@ -227,6 +285,9 @@ public class ScoreREDFAR extends OpMode {
      **/
     @Override
     public void loop() {
+
+        counter = counter + 1 ;
+        indexerModule.update();
 
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
@@ -240,8 +301,6 @@ public class ScoreREDFAR extends OpMode {
         hood.setPosition(hoodPosition);
         flywheelControl.set_speed((int) flywheelRPM);
 
-        intake.setPower(intakePower);
-        transfer.setPower(transferPower);
 
         float limelight_distance = 0;
         if (pose != null) {
@@ -276,9 +335,9 @@ public class ScoreREDFAR extends OpMode {
         telemetry.addData("Hood Position", hoodPosition);
         telemetry.addData("Motor Speed", flywheelControl.motor_speed_rpm);
         telemetry.addData("Hood Pos", hood.getPosition());
-        telemetry.addData("Intake Power", intakePower);
-        telemetry.addData("Transfer Power", transferPower);
         telemetry.addData("callback run", callbackran);
+        telemetry.addData("Timer", counter);
+
         telemetry.update();
 
 
@@ -292,16 +351,23 @@ public class ScoreREDFAR extends OpMode {
     public void init() {
 
 
-
-
-
-
-
-        flywheel = hardwareMap.get(DcMotor.class, "flywheel");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        transfer = hardwareMap.get(DcMotor.class, "transfer");
+        backIntake= hardwareMap.get(DcMotor.class, "backIntake"); // YELLOW & port 2 on EXPANSION hub
+        frontIntake= hardwareMap.get(DcMotor.class, "frontIntake"); // PURPLE & port 0 on CONTROL
+        flywheel = hardwareMap.get(DcMotor.class, "flywheel"); // WHITE & port 3 onCONTROL hub
+        turretRotation = hardwareMap.get(DcMotor.class, "turretRotation"); // GREY & port 3 on EXPANSION hub
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint"); // 12c Bus 0 on EXPANSION hub
+        ball1 = hardwareMap.get(Servo.class, "ball1"); // RED servo port 0 on EXPANSION hub
+        ball2 = hardwareMap.get(Servo.class, "ball2"); // YELLOW servo port 5 on CONTROL hub
+        ball3 = hardwareMap.get(Servo.class, "ball3"); // ORANGE servo port 0  on CONTROL hub
+        linearServo = hardwareMap.get(Servo.class, "linearServo"); // GREEN servo port 1 on EXPANSION hub
+        hood = hardwareMap.get(Servo.class, "hood"); // BLUE & servo port 1 on CONTROL hub
+        color1a = hardwareMap.get(RevColorSensorV3.class, "color1a"); // BLUE & 12c Bus 3 on EXPANSION hub
+        color1b = hardwareMap.get(RevColorSensorV3.class, "color1b"); // PURPLE & 12c Bus 2 on EXPANSION hub
+        color2a = hardwareMap.get(RevColorSensorV3.class, "color2a"); // YELLOW & 12c Bus 3 on CONTROL hub
+        color2b = hardwareMap.get(RevColorSensorV3.class, "color2b"); // GREEN & 12c Bus 2 on CONTROL hub
+        color3a = hardwareMap.get(RevColorSensorV3.class, "color3a"); // ORANGE & 12c Bus 1 on CONTROL hub
+        color3b = hardwareMap.get(RevColorSensorV3.class, "color3b"); // RED & 12c Bus 0 on CONTROL hub
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        hood = hardwareMap.get(Servo.class, "hood");
 
 
 
@@ -322,11 +388,18 @@ public class ScoreREDFAR extends OpMode {
         flywheelRPM = 0;
 
         llModule = new LimelightProcessingModule(limelight, telemetry);
+        limelight.start();
+
+        ((LynxI2cDeviceSynch) color1a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        ((LynxI2cDeviceSynch) color1b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        ((LynxI2cDeviceSynch) color2a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        ((LynxI2cDeviceSynch) color2b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        ((LynxI2cDeviceSynch) color3a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        ((LynxI2cDeviceSynch) color3b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+        indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-        flywheel.setDirection(DcMotor.Direction.REVERSE);
 
 
     }
