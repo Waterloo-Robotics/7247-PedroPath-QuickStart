@@ -188,10 +188,11 @@ public class ScoreREDFAR extends OpMode {
                     setPathState(2);
                 }
                 break;
-//
+
 //            case 2:
-//                if (!follower.isBusy()) {
+//                if (!follower.isBusy()  /*&& counter > */ ) {
 //                    follower.followPath(pickup1endPath);
+//                    frontintakePower = 0;
 //
 //                    setPathState(3);
 //                }
@@ -211,61 +212,89 @@ public class ScoreREDFAR extends OpMode {
 //                }
 //                break;
 //            case 5:
-//                if (!follower.isBusy()) {
-//                    follower.followPath(pickup2startPath);
-//
+//                if(/*counter > 50*/){
+//                    indexerModule.shootAll();
 //                    setPathState(6);
 //                }
 //                break;
+//
 //            case 6:
-//                if (!follower.isBusy()) {
-//                    follower.followPath(pickup2endPath);
+//                if (!follower.isBusy()  /*&& counter > */) {
+//                    follower.followPath(pickup2startPath);
+//                    frontintakePower = 1;
 //
 //                    setPathState(7);
 //                }
 //                break;
-//
 //            case 7:
 //                if (!follower.isBusy()) {
-//                    follower.followPath(shoot3stallPath);
+//                    follower.followPath(pickup2endPath);
+//                    frontintakePower = 0;
+//
 //
 //                    setPathState(8);
 //                }
 //                break;
+//
 //            case 8:
 //                if (!follower.isBusy()) {
-//                    follower.followPath(shoot3Path);
+//                    follower.followPath(shoot3stallPath);
 //
 //                    setPathState(9);
 //                }
 //                break;
 //            case 9:
 //                if (!follower.isBusy()) {
-//                    follower.followPath(pickup3startPath);
+//                    follower.followPath(shoot3Path);
 //
 //                    setPathState(10);
 //                }
 //                break;
-//            case 10:
-//                if (!follower.isBusy()) {
-//                    follower.followPath(pickup3endPath);
 //
+//            case 10:
+//                if(/*counter > 50*/){
+//                    indexerModule.shootAll();
 //                    setPathState(11);
 //                }
+//
 //                break;
 //            case 11:
-//                if (!follower.isBusy()) {
-//                    follower.followPath(shoot4Path);
+//                if (!follower.isBusy()  /*&& counter > */ ) {
+//                    follower.followPath(pickup3startPath);
+//                    frontintakePower = 1;
 //
 //                    setPathState(12);
 //                }
 //                break;
 //            case 12:
 //                if (!follower.isBusy()) {
-//                    follower.followPath(endPath);
-//                    flywheel_off();
+//                    follower.followPath(pickup3endPath);
+//                    frontintakePower = 0;
+//
 //
 //                    setPathState(13);
+//                }
+//                break;
+//            case 13:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(shoot4Path);
+//
+//                    setPathState(14);
+//                }
+//                break;
+//            case 14:
+//                if(/*counter > 50*/){
+//                    indexerModule.shootAll();
+//                    setPathState(16);
+//                }
+//                break;
+//            case 15:
+//                if (!follower.isBusy()  /*&& counter > */ ) {
+//                    follower.followPath(endPath);
+//                    flywheel_off()
+//                    frontintakePower = 0;
+//
+//                    setPathState(16);
 //                }
 //                break;
 
