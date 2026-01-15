@@ -81,8 +81,7 @@ public class Constants {
             hood = hardwareMap.get(Servo.class, "hood");
 
 
-            flywheel.setDirection(DcMotor.Direction.FORWARD);
-        }
+            flywheel.setDirection(DcMotor.Direction.REVERSE);        }
 
         /* ---------- Modules & Sensors ---------- */
         private flywheelModule flywheelControl;
