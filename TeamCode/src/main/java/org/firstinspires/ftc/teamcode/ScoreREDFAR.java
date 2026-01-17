@@ -65,9 +65,9 @@ public class ScoreREDFAR extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState = -1;
     int counter;
-    private final Pose startPose = new Pose(88, 8, Math.toRadians(90)); // Start Pose of our robot.
-    private final Pose shoot1 = new Pose(83, 83, Math.toRadians(45));  // shooting preload
-    private final Pose pickup1start = new Pose(104, 35, Math.toRadians(0));  // pick up 1st row start
+    private final Pose startPose = new Pose(88, 8, Math.toRadians(270)); // Start Pose of our robot.
+    private final Pose shoot1 = new Pose(83, 83, Math.toRadians(225));  // shooting preload
+    private final Pose pickup1start = new Pose(109, 18, Math.toRadians(360));  // pick up 1st row start
     private final Pose pickup1end = new Pose(129, 35, Math.toRadians(0));  // picking up 1st row end
     private final Pose shoot2stall = new Pose(85, 50, Math.toRadians(0));  // shooting preload
     private final Pose shoot2 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
@@ -84,10 +84,13 @@ public class ScoreREDFAR extends OpMode {
 
 
     public void flywheel_on(){
-        flywheelRPM = 3500;
+        flywheelRPM = -1550;
     }
     public void flywheel_off(){
         flywheelRPM = 0;
+    }
+    public void intake_on(){
+        frontintakePower = 1;
     }
     public void shooALL(){
         indexerModule.shootAll();
@@ -98,6 +101,7 @@ public class ScoreREDFAR extends OpMode {
 //    public void shootPURPLE(){
 //        indexerModule.shootPurple();
 //    }
+    public void hoodUP() {hoodPosition = 0.6; };
     public void setCallbackran(){
         callbackran = true;
     }
@@ -170,30 +174,43 @@ public class ScoreREDFAR extends OpMode {
         switch (pathState) {
             case -1:
                 follower.followPath(shoot1Path);
+                hoodUP();
                 flywheel_on();
                 setPathState(0);
                 break;
             case 0:
-                if(counter > 50){
+                if(counter > 30){
                     indexerModule.shootAll();
                     setPathState(1);
+
                 }
 
                 break;
             case 1:
-                if (!follower.isBusy() && counter > 170) {
-                    follower.followPath(pickup1startPath);
-                    frontintakePower = 1;
-
+                if(counter > 50){
+                    indexerModule.shootAll();
                     setPathState(2);
                 }
-                break;
 
+                break;
+            case 2:
+                if(counter > 75){
+                    indexerModule.shootAll();
+                    setPathState(3);
+                }
+
+                break;
+            case 3:
+                if (!follower.isBusy() && counter > 100) {
+                    follower.followPath(pickup1startPath);
+                    flywheel_off();
+                    setPathState(4);
+                }
+                break;
+//
 //            case 2:
 //                if (!follower.isBusy()  /*&& counter > */ ) {
 //                    follower.followPath(pickup1endPath);
-//                    frontintakePower = 0;
-//
 //                    setPathState(3);
 //                }
 //                break;
@@ -320,6 +337,7 @@ public class ScoreREDFAR extends OpMode {
 
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
+        frontIntake.setPower(frontintakePower);
         autonomousPathUpdate();
 
         float rpm = 0;

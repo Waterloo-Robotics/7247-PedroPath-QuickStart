@@ -24,8 +24,8 @@ import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "SCORE RED CLOSE", group = "Examples")
-public class ScoreRED extends OpMode {
+@Autonomous(name = "SCORE BLUE CLOSE", group = "Examples")
+public class ScoreBLUECLOSE extends OpMode {
     private DcMotor backIntake;
     private DcMotor frontIntake;
     private DcMotor turretRotation;
@@ -65,9 +65,9 @@ public class ScoreRED extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState = -1;
     int counter;
-    private final Pose startPose = new Pose(121, 120, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose shoot1 = new Pose(108, 108, Math.toRadians(225));  // shooting preload
-    private final Pose pickup1start = new Pose(96, 125, Math.toRadians(360));  // pick up 1st row start
+    private final Pose startPose = new Pose(24, 120, Math.toRadians(360)); // Start Pose of our robot.
+    private final Pose shoot1 = new Pose(32, 108, Math.toRadians(315));  // shooting preload
+    private final Pose pickup1start = new Pose(32, 125, Math.toRadians(180));  // pick up 1st row start
     private final Pose pickup1end = new Pose(129, 35, Math.toRadians(0));  // picking up 1st row end
     private final Pose shoot2stall = new Pose(85, 50, Math.toRadians(0));  // shooting preload
     private final Pose shoot2 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
