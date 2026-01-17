@@ -13,7 +13,7 @@ public class IndexerModule {
     public IndexerSpot artifact_3;
 
     private double GREENLED = 0.500;
-    private double REDLED = 0.277;
+    private double REDLED = 0.29;
     private double YELLOWLED = 0.388;
     private double LEDOFF = 0.0;
     public List<IndexerSpot> artifacts = new ArrayList<>();
@@ -33,7 +33,8 @@ public class IndexerModule {
 
     public IndexerModule(Servo a1_servo, RevColorSensorV3 a1_color_a, RevColorSensorV3 a1_color_b,
                          Servo a2_servo, RevColorSensorV3 a2_color_a, RevColorSensorV3 a2_color_b,
-                         Servo a3_servo, RevColorSensorV3 a3_color_a, RevColorSensorV3 a3_color_b)
+                         Servo a3_servo, RevColorSensorV3 a3_color_a, RevColorSensorV3 a3_color_b,
+                         Servo light1)
     {
         this.artifact_1 = new IndexerSpot(a1_servo, a1_color_a, a1_color_b, 1, 0, 0.76);
         this.artifact_2 = new IndexerSpot(a2_servo, a2_color_a, a2_color_b, 1, 0, 0.73);
@@ -42,7 +43,7 @@ public class IndexerModule {
         this.artifacts.add(this.artifact_1);
         this.artifacts.add(this.artifact_2);
         this.artifacts.add(this.artifact_3);
-//        this.light1 = light1;
+        this.light1 = light1;
     }
 
     public void update()
@@ -51,18 +52,18 @@ public class IndexerModule {
         this.artifact_2.update();
         this.artifact_3.update();
 
-//        if (num_artifacts == 0) {
-//            light1.setPosition(LEDOFF);
-//        }
-//        else if (num_artifacts == 1) {
-//            light1.setPosition(GREENLED);
-//        }
-//        else if (num_artifacts == 2) {
-//            light1.setPosition(YELLOWLED);
-//        }
-//        else if (num_artifacts == 3) {
-//            light1.setPosition(REDLED);
-//        }
+        if (num_artifacts == 0) {
+            light1.setPosition(LEDOFF);
+        }
+        else if (num_artifacts == 1) {
+            light1.setPosition(GREENLED);
+        }
+        else if (num_artifacts == 2) {
+            light1.setPosition(YELLOWLED);
+        }
+        else if (num_artifacts == 3) {
+            light1.setPosition(REDLED);
+        }
         /* Recount the number of artifacts currently in the indexer */
         this.num_artifacts = 0;
         for (IndexerSpot spot : this.artifacts)

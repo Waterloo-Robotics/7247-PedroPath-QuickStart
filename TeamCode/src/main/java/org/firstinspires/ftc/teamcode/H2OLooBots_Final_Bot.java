@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static android.os.SystemClock.sleep;
+
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
@@ -16,7 +18,11 @@ import org.firstinspires.ftc.teamcode.Modules.FCDrivebaseModule;
 import org.firstinspires.ftc.teamcode.Modules.IndexerModule;
 import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
 import org.firstinspires.ftc.teamcode.Modules.Table2D;
+import org.firstinspires.ftc.teamcode.Modules.TurretModule;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp(name="H2OLooBots_Final_Bot", group="LinearOpMode")
 public class H2OLooBots_Final_Bot extends OpMode {
@@ -35,7 +41,6 @@ public class H2OLooBots_Final_Bot extends OpMode {
     private Servo ball3;
     private Servo hood;
     private Servo linearServo;
-    private Servo light1;
     private RevColorSensorV3 color1a;
     private RevColorSensorV3 color1b;
     private RevColorSensorV3 color2a;
@@ -46,7 +51,8 @@ public class H2OLooBots_Final_Bot extends OpMode {
     private Limelight3A limelight;
     private LimelightProcessingModule llModule;
     private IndexerModule indexerModule;
-   // private Servo full_light;
+    private Servo light1;
+    private TurretModule turretModule;
 
     /* ---------- Variables ---------- */
     private double hoodPosition = 1; // start with hood down
@@ -88,7 +94,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
         light1 = hardwareMap.get(Servo.class, "light1");
 
         drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint);
-
+        turretModule = new TurretModule(linearServo, turretRotation);
 
         // Mecanum motor directions
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -110,7 +116,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
         ((LynxI2cDeviceSynch) color2b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         ((LynxI2cDeviceSynch) color3a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         ((LynxI2cDeviceSynch) color3b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b);
+        indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -118,7 +124,23 @@ public class H2OLooBots_Final_Bot extends OpMode {
 
     @Override
     public void loop() {
-
+        if (gamepad2.  aWasPressed())
+        {
+            turretModule.home_turret();
+        } else if (gamepad2.dpadDownWasPressed())
+        {
+            turretModule.go_backwards();
+        } else if (gamepad2.dpadUpWasPressed())
+        {
+            turretModule.go_forwards();
+        }else if(gamepad2.dpadLeftWasPressed())
+        {
+            turretModule.go_left();
+        }else if(gamepad2.dpadRightWasPressed())
+        {
+            turretModule.go_right();
+        }
+        turretModule.update();
 //        if(hoodPosition <= .4){
 //            hoodPosition = .4;
 //        }
@@ -129,7 +151,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
 
         Pose2D pose = llModule.limelightResult();
         float limelight_distance = 0;
-       // Pose2D pose = null; not sure why we had this but ill just comment it out
+        // Pose2D pose = null; not sure why we had this but ill just comment it out
 
         if (pose != null) {
             limelight_distance = (float) (1.75*(float) -pose.getX(DistanceUnit.INCH));
@@ -138,6 +160,8 @@ public class H2OLooBots_Final_Bot extends OpMode {
                 limelight_available = true;
             }
 
+
+
             if(limelight_available){
                 rpm =  (flywheel_speed_table.Lookup(limelight_distance));
                 angle = hood_angle_table.Lookup(limelight_distance);
@@ -145,6 +169,10 @@ public class H2OLooBots_Final_Bot extends OpMode {
             else if (hood_angle_table.Lookup(limelight_distance) <= .45) {
                 angle = .45F;
             }
+            else{
+                rpm = 2500;
+            }
+
         }
 
         /* ---------------- DRIVE CODE ---------------- */
@@ -176,12 +204,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
             frontintakePower = 1;
             backintakePower = 1;
         }
-        else {
-            frontintakePower = 0;
-            backintakePower = 0;
-        }
-
-        if (gamepad1.right_bumper) {
+        else if(gamepad1.right_bumper){
             frontintakePower = -1;
             backintakePower = -1;
         }
@@ -223,7 +246,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
 //        }
         hoodPosition = Math.max(0.0, Math.min(1.0, hoodPosition));
 
-        if(gamepad2.dpadDownWasPressed() || gamepad1.dpadDownWasPressed()){
+        if(gamepad1.dpadDownWasPressed()){
             AutoTargeting = !AutoTargeting;
         }
 
@@ -264,6 +287,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
         telemetry.addData("PID Power", flywheelControl.pid_power);
         telemetry.addData("Hood Pos", hood.getPosition());
         telemetry.addData("AutoTargeting",AutoTargeting);
+        telemetry.addData("Artifacts Deletected", indexerModule.num_artifacts);
         telemetry.update();
     }
 }
