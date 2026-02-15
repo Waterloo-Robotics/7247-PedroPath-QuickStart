@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.modules.flywheelModule;
+import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 
 @TeleOp(name="HoodFly Setpoint Test", group="TestOpMode")
 public class HoodFlywheelTest extends OpMode {

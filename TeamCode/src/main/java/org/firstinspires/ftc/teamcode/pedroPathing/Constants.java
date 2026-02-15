@@ -80,7 +80,6 @@ public class Constants {
             limelight = hardwareMap.get(Limelight3A.class, "limelight");
             hood = hardwareMap.get(Servo.class, "hood");
 
-
             flywheel.setDirection(DcMotor.Direction.REVERSE);        }
 
         /* ---------- Modules & Sensors ---------- */

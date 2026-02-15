@@ -24,8 +24,8 @@ import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "SCORE BLUE FAR", group = "Examples")
-public class ScoreBLUEFAR extends OpMode {
+@Autonomous(name = "SCORE RED FAR", group = "Examples")
+public class Score_Red_Far extends OpMode {
     private DcMotor backIntake;
     private DcMotor frontIntake;
     private DcMotor turretRotation;
@@ -45,13 +45,11 @@ public class ScoreBLUEFAR extends OpMode {
     private Limelight3A limelight;
     private LimelightProcessingModule llModule;
     private IndexerModule indexerModule;
-    private float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
-    private float[] flywheel_speed = {2700, 3000, 3000, 3000, 3300, 3200, 3300, 3500, 3350, 4000,4000};
-    private float[] hood_angle = { (float)0.67, (float)0.4, (float)0.4, (float)0.4, (float)0.2,(float)0.0,(float)0.0,(float)0.0,(float)0.65,(float)0.55, (float)0.50};
-    private org.firstinspires.ftc.teamcode.Modules.Table2D flywheel_speed_table = new org.firstinspires.ftc.teamcode.Modules.Table2D(distance, flywheel_speed);
-    private org.firstinspires.ftc.teamcode.Modules.Table2D hood_angle_table = new Table2D(distance, hood_angle);
+    private Table2D flywheel_speed_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.flywheel_speed);
+    private Table2D hood_angle_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.hood_angle);
     boolean AutoTargeting;
     GoBildaPinpointDriver pinpoint;
+    private Servo light1;
 
 
     /* ---------- Variables ---------- */
@@ -65,9 +63,9 @@ public class ScoreBLUEFAR extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState = -1;
     int counter;
-    private final Pose startPose = new Pose(60, 8, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose shoot1 = new Pose(59, 83, Math.toRadians(315));  // shooting preload
-    private final Pose pickup1start = new Pose(36, 18, Math.toRadians(180));  // pick up 1st row start
+    private final Pose startPose = new Pose(88, 8, Math.toRadians(270)); // Start Pose of our robot.
+    private final Pose shoot1 = new Pose(83, 83, Math.toRadians(225));  // shooting preload
+    private final Pose pickup1start = new Pose(109, 18, Math.toRadians(360));  // pick up 1st row start
     private final Pose pickup1end = new Pose(129, 35, Math.toRadians(0));  // picking up 1st row end
     private final Pose shoot2stall = new Pose(85, 50, Math.toRadians(0));  // shooting preload
     private final Pose shoot2 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
@@ -79,9 +77,6 @@ public class ScoreBLUEFAR extends OpMode {
     private final Pose pickup3end = new Pose(129, 83, Math.toRadians(0));  // picking up 1st row end
     private final Pose shoot4 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
     private final Pose end = new Pose(96, 24, Math.toRadians(45));  // shooting first row
-
-
-
 
     public void flywheel_on(){
         flywheelRPM = -1550;
@@ -95,7 +90,7 @@ public class ScoreBLUEFAR extends OpMode {
     public void shooALL(){
         indexerModule.shootAll();
     }
-    //    public void shooGREEN(){
+//    public void shooGREEN(){
 //        indexerModule.shootGreen();
 //    }
 //    public void shootPURPLE(){
@@ -415,6 +410,7 @@ public class ScoreBLUEFAR extends OpMode {
         color3a = hardwareMap.get(RevColorSensorV3.class, "color3a"); // ORANGE & 12c Bus 1 on CONTROL hub
         color3b = hardwareMap.get(RevColorSensorV3.class, "color3b"); // RED & 12c Bus 0 on CONTROL hub
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        light1 = hardwareMap.get(Servo.class, "light1");
 
 
 
@@ -443,7 +439,7 @@ public class ScoreBLUEFAR extends OpMode {
         ((LynxI2cDeviceSynch) color2b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         ((LynxI2cDeviceSynch) color3a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         ((LynxI2cDeviceSynch) color3b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b);
+        indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
