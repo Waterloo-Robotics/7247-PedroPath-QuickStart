@@ -29,6 +29,8 @@ public class IndexerModule {
     public ModuleStates module_state = ModuleStates.WAITING;
 
     private IndexerSpot last_fired_indexer;
+    private int shoot_all_index;
+    private boolean shoot_all_active;
     private ElapsedTime delay = new ElapsedTime();
 
     public IndexerModule(Servo a1_servo, RevColorSensorV3 a1_color_a, RevColorSensorV3 a1_color_b,
@@ -36,7 +38,7 @@ public class IndexerModule {
                          Servo a3_servo, RevColorSensorV3 a3_color_a, RevColorSensorV3 a3_color_b,
                          Servo light1)
     {
-        this.artifact_1 = new IndexerSpot(a1_servo, a1_color_a, a1_color_b, 1, 0, 0.76);
+        this.artifact_1 = new IndexerSpot(a1_servo, a1_color_a, a1_color_b, 1, 0, 0.79);
         this.artifact_2 = new IndexerSpot(a2_servo, a2_color_a, a2_color_b, 1, 0, 0.73);
         this.artifact_3 = new IndexerSpot(a3_servo, a3_color_a, a3_color_b, 0, 1, 0.14);
 
@@ -89,12 +91,27 @@ public class IndexerModule {
                 /* If there is a spot we just shot and it has returned back home, shoot the next spot */
                 if (this.last_fired_indexer == null || (this.last_fired_indexer != null && this.last_fired_indexer.isHome()))
                 {
-                    boolean shot_next = this.shootNext();
+                    if (this.shoot_all_index == 0)
+                    {
+                        this.artifact_1.return_to_middle = true;
+                    }
+
+                    /* Manually lifting the empty spot since we know exactly which one it is */
+                    if (this.shoot_all_index == 1)
+                    {
+                        artifact_1.blockMiddle();
+                    }
+
+                    artifacts.get(shoot_all_index).shoot();
+
+                    this.last_fired_indexer = artifacts.get(shoot_all_index);
+                    shoot_all_index++;
 
                     /* If we ran out of artifacts to shoot, return to waiting state */
-                    if (!shot_next)
+                    if (shoot_all_index == 3)
                     {
                         this.module_state = ModuleStates.WAITING;
+                        this.shoot_all_active = false;
                     }
                 }
 
@@ -103,7 +120,14 @@ public class IndexerModule {
                 if (delay.seconds() > 0.1)
                 {
                     this.last_fired_indexer.shoot();
-                    this.module_state = ModuleStates.SHOOT_INDIVIDUAL;
+                    if (this.shoot_all_active)
+                    {
+                        this.module_state = ModuleStates.SHOOT_ALL;
+                    }
+                    else
+                    {
+                        this.module_state = ModuleStates.SHOOT_INDIVIDUAL;
+                    }
                 }
 
         }
@@ -189,6 +213,8 @@ public class IndexerModule {
 
     public void shootAll()
     {
+        this.shoot_all_index = 0;
+        this.shoot_all_active = true;
         this.module_state = ModuleStates.SHOOT_ALL;
     }
 

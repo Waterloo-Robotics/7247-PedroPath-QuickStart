@@ -31,6 +31,8 @@ public class IndexerSpot {
     private ModuleStates module_state = ModuleStates.HOME;
     private final ElapsedTime servo_timer = new ElapsedTime();
 
+    public boolean return_to_middle;
+
     public IndexerSpot(Servo spot_servo,
                        RevColorSensorV3 spot_color_a,
                        RevColorSensorV3 spot_color_b,
@@ -44,6 +46,7 @@ public class IndexerSpot {
         this.home_position = home;
         this.shoot_position = shoot;
         this.middle_position = middle;
+        this.return_to_middle = false;
 
         this.servo.setPosition(this.home_position);
     }
@@ -101,11 +104,19 @@ public class IndexerSpot {
             case SHOOTING:
                 /* If enough time has elapsed for the artifact to put into the
                 /* turret, then reset the timer and lower the arm */
-                if (this.servo_timer.seconds() > 0.7)
+                if (this.servo_timer.seconds() > 0.4)
                 {
                     this.servo_timer.reset();
 
-                    this.servo.setPosition(this.home_position);
+                    if (this.return_to_middle)
+                    {
+                        this.servo.setPosition(this.middle_position);
+                        this.return_to_middle = false;
+                    }
+                    else
+                    {
+                        this.servo.setPosition(this.home_position);
+                    }
                     this.module_state = ModuleStates.RETURNING_HOME;
                 }
                 break;
@@ -113,7 +124,7 @@ public class IndexerSpot {
             case RETURNING_HOME:
                 /* If enough time has elapsed for the arm to return home,
                 /* stop the timer and return status to home */
-                if (this.servo_timer.seconds() > 0.2)
+                if (this.servo_timer.seconds() > 0.4)
                 {
                     this.servo_timer.reset();
 
