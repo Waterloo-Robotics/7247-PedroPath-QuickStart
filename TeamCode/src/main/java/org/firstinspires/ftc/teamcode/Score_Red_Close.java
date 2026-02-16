@@ -6,15 +6,8 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -25,32 +18,16 @@ import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "SCORE RED CLOSE", group = "Examples")
-public class Score_Red_Close extends OpMode {
-    private DcMotor backIntake;
-    private DcMotor frontIntake;
-    private DcMotor turretRotation;
-    private DcMotor flywheel;
-    private Servo ball1;
-    private Servo ball2;
-    private Servo ball3;
-    private Servo hood;
-    private Servo linearServo;
-    private RevColorSensorV3 color1a;
-    private RevColorSensorV3 color1b;
-    private RevColorSensorV3 color2a;
-    private RevColorSensorV3 color2b;
-    private RevColorSensorV3 color3a;
-    private RevColorSensorV3 color3b;
+public class Score_Red_Close extends WlooOpmode {
+
     private flywheelModule flywheelControl;
     private Limelight3A limelight;
-    private Servo light1;
     private LimelightProcessingModule llModule;
     private IndexerModule indexerModule;
 
     private Table2D flywheel_speed_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.flywheel_speed);
     private Table2D hood_angle_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.hood_angle);
     boolean AutoTargeting;
-    GoBildaPinpointDriver pinpoint;
 
 
     /* ---------- Variables ---------- */
@@ -387,30 +364,7 @@ public class Score_Red_Close extends OpMode {
      **/
     @Override
     public void init() {
-
-
-        backIntake= hardwareMap.get(DcMotor.class, "backIntake"); // YELLOW & port 2 on EXPANSION hub
-        frontIntake= hardwareMap.get(DcMotor.class, "frontIntake"); // PURPLE & port 0 on CONTROL
-        flywheel = hardwareMap.get(DcMotor.class, "flywheel"); // WHITE & port 3 onCONTROL hub
-        turretRotation = hardwareMap.get(DcMotor.class, "turretRotation"); // GREY & port 3 on EXPANSION hub
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint"); // 12c Bus 0 on EXPANSION hub
-        ball1 = hardwareMap.get(Servo.class, "ball1"); // RED servo port 0 on EXPANSION hub
-        ball2 = hardwareMap.get(Servo.class, "ball2"); // YELLOW servo port 5 on CONTROL hub
-        ball3 = hardwareMap.get(Servo.class, "ball3"); // ORANGE servo port 0  on CONTROL hub
-        linearServo = hardwareMap.get(Servo.class, "linearServo"); // GREEN servo port 1 on EXPANSION hub
-        hood = hardwareMap.get(Servo.class, "hood"); // BLUE & servo port 1 on CONTROL hub
-        color1a = hardwareMap.get(RevColorSensorV3.class, "color1a"); // BLUE & 12c Bus 3 on EXPANSION hub
-        color1b = hardwareMap.get(RevColorSensorV3.class, "color1b"); // PURPLE & 12c Bus 2 on EXPANSION hub
-        color2a = hardwareMap.get(RevColorSensorV3.class, "color2a"); // YELLOW & 12c Bus 3 on CONTROL hub
-        color2b = hardwareMap.get(RevColorSensorV3.class, "color2b"); // GREEN & 12c Bus 2 on CONTROL hub
-        color3a = hardwareMap.get(RevColorSensorV3.class, "color3a"); // ORANGE & 12c Bus 1 on CONTROL hub
-        color3b = hardwareMap.get(RevColorSensorV3.class, "color3b"); // RED & 12c Bus 0 on CONTROL hub
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        light1 = hardwareMap.get(Servo.class, "light1");
-
-
-
-
+        super.init();
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
@@ -429,18 +383,10 @@ public class Score_Red_Close extends OpMode {
         llModule = new LimelightProcessingModule(limelight, telemetry);
         limelight.start();
 
-        ((LynxI2cDeviceSynch) color1a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color1b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color2a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color2b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color3a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color3b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-
     }
 
 }

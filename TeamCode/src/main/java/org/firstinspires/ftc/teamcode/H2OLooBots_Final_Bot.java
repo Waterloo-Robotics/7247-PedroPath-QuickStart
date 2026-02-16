@@ -1,15 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import static android.os.SystemClock.sleep;
-
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -21,37 +12,12 @@ import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.TurretModule;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @TeleOp(name="H2OLooBots_Final_Bot", group="LinearOpMode")
-public class H2OLooBots_Final_Bot extends OpMode {
+public class H2OLooBots_Final_Bot extends WlooOpmode {
 
-    /* ---------- Drive Motors ---------- */
-    private DcMotor backLeft;
-    private DcMotor backRight;
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor backIntake;
-    private DcMotor frontIntake;
-    private DcMotor turretRotation;
-    private DcMotor flywheel;
-    private Servo ball1;
-    private Servo ball2;
-    private Servo ball3;
-    private Servo hood;
-    private Servo linearServo;
-    private RevColorSensorV3 color1a;
-    private RevColorSensorV3 color1b;
-    private RevColorSensorV3 color2a;
-    private RevColorSensorV3 color2b;
-    private RevColorSensorV3 color3a;
-    private RevColorSensorV3 color3b;
     private flywheelModule flywheelControl;
-    private Limelight3A limelight;
     private LimelightProcessingModule llModule;
     private IndexerModule indexerModule;
-    private Servo light1;
     private TurretModule turretModule;
 
     /* ---------- Variables ---------- */
@@ -59,49 +25,16 @@ public class H2OLooBots_Final_Bot extends OpMode {
     private double flywheelRPM;
     private double turretRotaTION;
     FCDrivebaseModule drivebase;
-    private float[] distance = {22, 30, 35, 40,44,52,56,69,81,125,126};
-    private float[] flywheel_speed = {2700, 3000, 3000, 3000, 3300, 3200, 3300, 3500, 3350, 4000,4000};
-    private float[] hood_angle = { (float)0.67, (float)0.4, (float)0.4, (float)0.4, (float)0.2,(float)0.0,(float)0.0,(float)0.0,(float)0.65,(float)0.55, (float)0.50};
-    private Table2D flywheel_speed_table = new Table2D(distance, flywheel_speed);
-    private Table2D hood_angle_table = new Table2D(distance, hood_angle);
+    private Table2D flywheel_speed_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.flywheel_speed);
+    private Table2D hood_angle_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.hood_angle);
     boolean AutoTargeting;
-    GoBildaPinpointDriver pinpoint;
 
     @Override
     public void init() {
-        /* ----- Hardware Map ----- */
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");  // ORANGE & port 1 on EXPANSION hub
-        backRight = hardwareMap.get(DcMotor.class, "backRight"); // GREEN & port 2 on CONTROL hub
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight"); //BLUE & port 1 on CONTROL hub
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");  // RED  & port 0 on EXPANSION hub
-        backIntake= hardwareMap.get(DcMotor.class, "backIntake"); // YELLOW & port 2 on EXPANSION hub
-        frontIntake= hardwareMap.get(DcMotor.class, "frontIntake"); // PURPLE & port 0 on CONTROL
-        flywheel = hardwareMap.get(DcMotor.class, "flywheel"); // WHITE & port 3 onCONTROL hub
-        turretRotation = hardwareMap.get(DcMotor.class, "turretRotation"); // GREY & port 3 on EXPANSION hub
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint"); // 12c Bus 0 on EXPANSION hub
-        ball1 = hardwareMap.get(Servo.class, "ball1"); // RED servo port 0 on EXPANSION hub
-        ball2 = hardwareMap.get(Servo.class, "ball2"); // YELLOW servo port 5 on CONTROL hub
-        ball3 = hardwareMap.get(Servo.class, "ball3"); // ORANGE servo port 0  on CONTROL hub
-        linearServo = hardwareMap.get(Servo.class, "linearServo"); // GREEN servo port 1 on EXPANSION hub
-        hood = hardwareMap.get(Servo.class, "hood"); // BLUE & servo port 1 on CONTROL hub
-        color1a = hardwareMap.get(RevColorSensorV3.class, "color1a"); // BLUE & 12c Bus 3 on EXPANSION hub
-        color1b = hardwareMap.get(RevColorSensorV3.class, "color1b"); // PURPLE & 12c Bus 2 on EXPANSION hub
-        color2a = hardwareMap.get(RevColorSensorV3.class, "color2a"); // YELLOW & 12c Bus 3 on CONTROL hub
-        color2b = hardwareMap.get(RevColorSensorV3.class, "color2b"); // GREEN & 12c Bus 2 on CONTROL hub
-        color3a = hardwareMap.get(RevColorSensorV3.class, "color3a"); // ORANGE & 12c Bus 1 on CONTROL hub
-        color3b = hardwareMap.get(RevColorSensorV3.class, "color3b"); // RED & 12c Bus 0 on CONTROL hub
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        light1 = hardwareMap.get(Servo.class, "light1");
+        super.init();
 
         drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint);
         turretModule = new TurretModule(linearServo, turretRotation);
-
-        // Mecanum motor directions
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
-        flywheel.setDirection(DcMotor.Direction.REVERSE);
 
         // Modules
         flywheelControl = new flywheelModule(flywheel);
@@ -110,12 +43,6 @@ public class H2OLooBots_Final_Bot extends OpMode {
         llModule = new LimelightProcessingModule(limelight, telemetry);
         limelight.start();
 
-        ((LynxI2cDeviceSynch) color1a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color1b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color2a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color2b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color3a.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-        ((LynxI2cDeviceSynch) color3b.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 
         telemetry.addData("Status", "Initialized");
@@ -124,7 +51,7 @@ public class H2OLooBots_Final_Bot extends OpMode {
 
     @Override
     public void loop() {
-        if (gamepad2.  aWasPressed())
+        if (gamepad2.aWasPressed())
         {
             turretModule.home_turret();
         } else if (gamepad2.dpadDownWasPressed())
