@@ -23,7 +23,7 @@ public class flywheelModule {
         /* Calculate Feedforward
         * the base power to use based on the maximum rpm the motor spins
         * at 100% power. Then limit between -1 and 1. */
-        double calc_power = ((float)speed_rpm) / 4100;
+        double calc_power = ((float)speed_rpm) / 5200;
         double limit_1 = Math.min(calc_power, 1);
         this.feedforward_power = Math.max(limit_1, -1);
 

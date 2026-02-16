@@ -114,7 +114,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         flywheelRPM += gamepad2.right_trigger * 50;
         flywheelRPM -= gamepad2.left_trigger * 50;
 
-        flywheelRPM = Math.max(0, Math.min(4200, flywheelRPM));
+        flywheelRPM = Math.max(0, Math.min(5200, flywheelRPM));
         flywheelControl.set_speed((int) flywheelRPM);
 
         /* ---------------- BALL / INTAKE / TRANSFER CONTROL ---------------- */

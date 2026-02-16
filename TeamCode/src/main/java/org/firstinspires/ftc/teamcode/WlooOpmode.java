@@ -30,7 +30,7 @@ public class WlooOpmode extends OpMode{
     public RevColorSensorV3 color3b;
     public Servo light1;
     public Limelight3A limelight;
-    GoBildaPinpointDriver pinpoint;
+    public GoBildaPinpointDriver pinpoint;
 
     @Override
     public void init() {
