@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
 import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.TurretModule;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
+import org.firstinspires.ftc.teamcode.Modules.DesiredAngleModule;
 
 @TeleOp(name="H2OLooBots_Final_Bot", group="LinearOpMode")
 public class H2OLooBots_Final_Bot extends WlooOpmode {
@@ -24,6 +25,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
     private LimelightProcessingModule llModule;
     private IndexerModule indexerModule;
     private TurretModule turretModule;
+    private DesiredAngleModule desiredAngleModule;
 
     /* ---------- Variables ---------- */
     private double hoodPosition = 1; // start with hood down
@@ -52,6 +54,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
+        desiredAngleModule = new DesiredAngleModule(false);
 
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
@@ -205,7 +208,13 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         hood.setPosition(hoodPosition);
         flywheelControl.set_speed((int) flywheelRPM);
 
-        updatePanels(new Pose(24, 24, Math.PI*0.75));
+        Pose2D fixedPosition = new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading);
+        double angle_deg = desiredAngleModule.estimate_desired_angle(fixedPosition);
+
+        updatePanels(new Pose(fixedPosition.getX(DistanceUnit.INCH),
+                              fixedPosition.getY(DistanceUnit.INCH),
+                              fixedPosition.getHeading(AngleUnit.RADIANS)),
+                angle_deg);
 
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
         if (pose != null) {
@@ -229,11 +238,14 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         telemetry.update();
     }
 
-    public void updatePanels(Pose robotPose)
+    public void updatePanels(Pose robotPose, double turretAngle)
     {
         /* Updating Panels Display with Robot Position Stuff */
         Style robotLook = new Style(
                 "", "#3F51B5", 0.75
+        );
+        Style turretLook = new Style(
+                "", "#FFA500", 0.75
         );
 
         panelsField.setStyle(robotLook);
@@ -247,6 +259,21 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
 
         panelsField.moveCursor(x1, y1);
         panelsField.line(x2, y2);
+
+        /* Start Turret Circle and Heading */
+        panelsField.setStyle(turretLook);
+        Pose turretPose = new Pose(robotPose.getX(), robotPose.getY(), Math.toRadians(turretAngle));
+
+        panelsField.moveCursor(turretPose.getX(), turretPose.getY());
+        panelsField.circle(4);
+
+        Vector vTurret = turretPose.getHeadingAsUnitVector();
+        vTurret.setMagnitude(vTurret.getMagnitude() * 4);
+        double x1Turret = turretPose.getX(), y1Turret = turretPose.getY();
+        double x2Turret = turretPose.getX() + vTurret.getXComponent(), y2Turret = turretPose.getY() + vTurret.getYComponent();
+
+        panelsField.moveCursor(x1Turret, y1Turret);
+        panelsField.line(x2Turret, y2Turret);
 
         panelsField.update();
     }
