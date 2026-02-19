@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.field.FieldManager;
+import com.bylazar.field.PanelsField;
+import com.bylazar.field.Style;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -29,6 +34,9 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
     private Table2D hood_angle_table = new Table2D(WlooConstants.flywheel_distance, WlooConstants.hood_angle);
     boolean AutoTargeting;
 
+    /* Panels */
+    private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
+
     @Override
     public void init() {
         super.init();
@@ -44,6 +52,8 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
+
+        panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -195,6 +205,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         hood.setPosition(hoodPosition);
         flywheelControl.set_speed((int) flywheelRPM);
 
+        updatePanels(new Pose(24, 24, Math.PI*0.75));
 
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
         if (pose != null) {
@@ -216,5 +227,27 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         telemetry.addData("AutoTargeting",AutoTargeting);
         telemetry.addData("Artifacts Deletected", indexerModule.num_artifacts);
         telemetry.update();
+    }
+
+    public void updatePanels(Pose robotPose)
+    {
+        /* Updating Panels Display with Robot Position Stuff */
+        Style robotLook = new Style(
+                "", "#3F51B5", 0.75
+        );
+
+        panelsField.setStyle(robotLook);
+        panelsField.moveCursor(robotPose.getX(), robotPose.getY());
+        panelsField.circle(9);
+
+        Vector v = robotPose.getHeadingAsUnitVector();
+        v.setMagnitude(v.getMagnitude() * 9);
+        double x1 = robotPose.getX() + v.getXComponent() / 2, y1 = robotPose.getY() + v.getYComponent() / 2;
+        double x2 = robotPose.getX() + v.getXComponent(), y2 = robotPose.getY() + v.getYComponent();
+
+        panelsField.moveCursor(x1, y1);
+        panelsField.line(x2, y2);
+
+        panelsField.update();
     }
 }
