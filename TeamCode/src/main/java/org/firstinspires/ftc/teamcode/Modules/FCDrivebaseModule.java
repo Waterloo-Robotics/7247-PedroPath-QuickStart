@@ -24,8 +24,7 @@ public class FCDrivebaseModule {
 
     public void update_Drive(double x, double y, double turn)
     {
-        double botHeading =  this.pinpoint.getHeading(AngleUnit.RADIANS);  //=0 ODO IMU
-
+        double botHeading = this.pinpoint.getHeading(AngleUnit.RADIANS) + (Math.PI/2);  //=0 ODO IMU
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
@@ -47,10 +46,5 @@ public class FCDrivebaseModule {
         this.backLeft.setPower(backLeftPower);
         this.backRight.setPower(backRightPower);
     }
-
-
-
-
-
 
 }

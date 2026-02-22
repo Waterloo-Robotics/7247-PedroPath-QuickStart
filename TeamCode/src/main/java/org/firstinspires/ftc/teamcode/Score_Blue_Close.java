@@ -310,26 +310,26 @@ public class Score_Blue_Close extends WlooOpmode {
         frontIntake.setPower(frontintakePower);
         autonomousPathUpdate();
 
-        float rpm = 0;
-        float angle = 1;
-        boolean limelight_available = false;
-
-        Pose2D pose = llModule.limelightResult();
-        hood.setPosition(hoodPosition);
-        flywheelControl.set_speed((int) flywheelRPM);
-
-
-        float limelight_distance = 0;
-        if (pose != null) {
-            limelight_distance = (float) (1.75*(float) -pose.getX(DistanceUnit.INCH));
-
-            if (limelight_distance < 81 || limelight_distance > 124) {
-                limelight_available = true;
-            }
-
-            rpm =  (flywheel_speed_table.Lookup(limelight_distance));
-            angle = hood_angle_table.Lookup(limelight_distance);
-        }
+//        float rpm = 0;
+//        float angle = 1;
+//        boolean limelight_available = false;
+//
+//        Pose2D pose = llModule.limelightResult();
+//        hood.setPosition(hoodPosition);
+//        flywheelControl.set_speed((int) flywheelRPM);
+//
+//
+//        float limelight_distance = 0;
+//        if (pose != null) {
+//            limelight_distance = (float) (1.75*(float) -pose.getX(DistanceUnit.INCH));
+//
+//            if (limelight_distance < 81 || limelight_distance > 124) {
+//                limelight_available = true;
+//            }
+//
+//            rpm =  (flywheel_speed_table.Lookup(limelight_distance));
+//            angle = hood_angle_table.Lookup(limelight_distance);
+//        }
 
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
@@ -339,13 +339,13 @@ public class Score_Blue_Close extends WlooOpmode {
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
 
 
-        if (pose != null) {
-            telemetry.addData("X (inches)", pose.getX(DistanceUnit.INCH));
-            telemetry.addData("Y (inches)", pose.getY(DistanceUnit.INCH));
-            telemetry.addData("Rotation (degrees)", pose.getHeading(AngleUnit.DEGREES));
-        } else {
-            telemetry.addData("Limelight", "No valid target");
-        }
+//        if (pose != null) {
+//            telemetry.addData("X (inches)", pose.getX(DistanceUnit.INCH));
+//            telemetry.addData("Y (inches)", pose.getY(DistanceUnit.INCH));
+//            telemetry.addData("Rotation (degrees)", pose.getHeading(AngleUnit.DEGREES));
+//        } else {
+//            telemetry.addData("Limelight", "No valid target");
+//        }
 
         /* ---------------- GENERAL TELEMETRY ---------------- */
         telemetry.addData("Flywheel RPM", flywheelRPM);
@@ -383,7 +383,6 @@ public class Score_Blue_Close extends WlooOpmode {
         flywheelRPM = 0;
 
         llModule = new LimelightProcessingModule(limelight, telemetry);
-        limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 

@@ -3,8 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.geometry.CoordinateSystem;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -42,6 +45,8 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
     @Override
     public void init() {
         super.init();
+        pinpoint.setOffsets(6.6318, 0, DistanceUnit.INCH);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
         drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint);
         turretModule = new TurretModule(linearServo, turretRotation);
@@ -56,9 +61,33 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
         desiredAngleModule = new DesiredAngleModule(false);
 
+        /* If the pinpoint position is greater than 10, it's likely that we ran an auto */
+        if ((pinpoint.getPosX(DistanceUnit.INCH) > 10) && (pinpoint.getPosY(DistanceUnit.INCH) > 10))
+        {
+            Pose2D pedro_path_pose = pinpoint.getPosition();
+            pinpoint.setPosY(pedro_path_pose.getX(DistanceUnit.INCH) - 72, DistanceUnit.INCH);
+            pinpoint.setPosX(-(pedro_path_pose.getY(DistanceUnit.INCH) - 72), DistanceUnit.INCH);
+            pinpoint.setHeading(pedro_path_pose.getHeading(AngleUnit.DEGREES) + 90, AngleUnit.DEGREES);
+        }
+
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
         telemetry.addData("Status", "Initialized");
+        telemetry.update();
+    }
+
+    @Override
+    public void init_loop() {
+        if (gamepad1.dpadRightWasPressed())
+        {
+            desiredAngleModule.on_red_side = true;
+        }
+        else if (gamepad1.dpadLeftWasPressed())
+        {
+            desiredAngleModule.on_red_side = false;
+        }
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
         telemetry.update();
     }
 
@@ -79,6 +108,9 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         }else if(gamepad2.dpadRightWasPressed())
         {
             turretModule.go_right();
+        } else if(gamepad2.rightStickButtonWasPressed())
+        {
+            turretModule.go_active();
         }
         turretModule.update();
 //        if(hoodPosition <= .4){
@@ -155,13 +187,13 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
 
         // --- Indexer controls ---
         indexerModule.update();
-        if (gamepad2.bWasPressed() || gamepad1.bWasPressed() && flywheelRPM >= 3000)
+        if (gamepad2.bWasPressed() || gamepad1.bWasPressed() && flywheelRPM >= 1800)
         {
             indexerModule.shootGreen();
-        } else if (gamepad2.xWasPressed()||gamepad1.xWasPressed() && flywheelRPM >= 3000)
+        } else if (gamepad2.xWasPressed()||gamepad1.xWasPressed() && flywheelRPM >= 1800)
         {
             indexerModule.shootPurple();
-        } else if (gamepad2.yWasPressed()||gamepad1.yWasPressed() && flywheelRPM >=3000)
+        } else if (gamepad2.yWasPressed()||gamepad1.yWasPressed() && flywheelRPM >= 1800)
         {
             indexerModule.shootAll();
         }
@@ -208,13 +240,26 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         hood.setPosition(hoodPosition);
         flywheelControl.set_speed((int) flywheelRPM);
 
-        Pose2D fixedPosition = new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading);
-        double angle_deg = desiredAngleModule.estimate_desired_angle(fixedPosition);
+        /* 0 Degrees is pointing at the audience, with counter-clockwise as positive */
+        /* Say our robot angle is 90 degrees, our desired turret angle is 135
+        * desired_turret_angle_field - robot_heading */
+//        Pose2D fixedPosition = new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading);
+        Pose2D fixedPosition = pinpoint.getPosition();
+        double desired_turret_angle_field = desiredAngleModule.estimate_desired_angle(fixedPosition);
+        double desired_turret_angle_robot;
+        if (fixedPosition.getHeading(AngleUnit.DEGREES) >= 0)
+        {
+            desired_turret_angle_robot = desired_turret_angle_field - fixedPosition.getHeading(AngleUnit.DEGREES);
+        }
+        else {
+            desired_turret_angle_robot = desired_turret_angle_field - (360 + fixedPosition.getHeading(AngleUnit.DEGREES));
+        }
+        turretModule.set_desired_turret_angle(desired_turret_angle_robot);
 
         updatePanels(new Pose(fixedPosition.getX(DistanceUnit.INCH),
                               fixedPosition.getY(DistanceUnit.INCH),
                               fixedPosition.getHeading(AngleUnit.RADIANS)),
-                angle_deg);
+                desired_turret_angle_field);
 
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
         if (pose != null) {
@@ -235,6 +280,10 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         telemetry.addData("Hood Pos", hood.getPosition());
         telemetry.addData("AutoTargeting",AutoTargeting);
         telemetry.addData("Artifacts Deletected", indexerModule.num_artifacts);
+        telemetry.addData("X:", pinpoint.getPosX(DistanceUnit.INCH));
+        telemetry.addData("Y:", pinpoint.getPosY(DistanceUnit.INCH));
+        telemetry.addData("Desired Turret Angle Field", desired_turret_angle_field);
+        telemetry.addData("Desired Turret Angle Robot", turretModule.target_position);
         telemetry.update();
     }
 

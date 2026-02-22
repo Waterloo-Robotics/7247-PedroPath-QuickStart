@@ -24,6 +24,8 @@ public class TurretModule {
     private static final double LEFT_POSITION = 302;
     private static final double RIGHT_POSITION = 1000;
 
+    private static final double COUNTERS_PER_DEGREE = (FORWARD_POSITION - BACKWARD_POSITION) / 180;
+
     public double target_position = 0;
     public PIDController turret_controller = new PIDController((float)0.001, 0 , (float)0.002);
     private static final double MAXIMUM_POWER = 1;
@@ -79,6 +81,29 @@ public class TurretModule {
     public void go_left()
     {
         this.current_state = ModuleStates.LEFT;
+    }
+
+    public void go_active()
+    {
+        this.current_state = ModuleStates.ACTIVE;
+    }
+
+
+    public void set_desired_turret_angle(double desired_angle_robot)
+    {
+        double count_from_forward = desired_angle_robot * COUNTERS_PER_DEGREE;
+
+        double unlimited_counts = FORWARD_POSITION - count_from_forward;
+
+        /* yo this is the limit stuff*/
+        if (unlimited_counts < BACKWARD_POSITION)
+        {
+            this.target_position = BACKWARD_POSITION;
+        } else if (unlimited_counts > FORWARD_POSITION) {
+            this.target_position = FORWARD_POSITION;
+        } else {
+            this.target_position = unlimited_counts;
+        }
     }
 
     public void update()
@@ -162,6 +187,13 @@ public class TurretModule {
                 if (this.home_found)
                 {
                     this.target_position = RIGHT_POSITION;
+                    drive_to_target();
+                }
+                break;
+
+            case ACTIVE:
+                if (this.home_found)
+                {
                     drive_to_target();
                 }
                 break;

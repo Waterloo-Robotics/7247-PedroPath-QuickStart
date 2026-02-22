@@ -16,7 +16,7 @@ public class DesiredAngleModule {
      * */
 
 
-    private boolean on_red_side;
+    public boolean on_red_side;
     double DesiredAngle;
     public DesiredAngleModule(boolean on_red_side)
     {
@@ -37,6 +37,7 @@ public class DesiredAngleModule {
             double y = robot_position.getY(DistanceUnit.INCH) + 55.6425;
             DesiredAngle = Math.atan2(y, x);
         }
-        return Math.toDegrees(DesiredAngle) + 180;
+        /* Return value is 0 - 360 with 0 pointing towards the audience and counter clockwise is positive */
+        return (Math.toDegrees(DesiredAngle) + 180) % 360;
     }
 }
