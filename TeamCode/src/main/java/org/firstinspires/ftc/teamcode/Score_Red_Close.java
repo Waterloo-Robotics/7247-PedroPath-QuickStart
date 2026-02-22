@@ -60,7 +60,7 @@ public class Score_Red_Close extends WlooOpmode {
 
 
     public void flywheel_on(){
-        flywheelRPM = -2800;
+        flywheelRPM = -1000;
     }
     public void flywheel_off(){
         flywheelRPM = 0;
@@ -77,7 +77,7 @@ public class Score_Red_Close extends WlooOpmode {
 //    public void shootPURPLE(){
 //        indexerModule.shootPurple();
 //    }
-    public void hoodUP() {hoodPosition = 0.782f; };
+    public void hoodUP() {hoodPosition = 0.1; };
     public void setCallbackran(){
         callbackran = true;
     }
@@ -381,6 +381,7 @@ public class Score_Red_Close extends WlooOpmode {
         flywheelRPM = 0;
 
         llModule = new LimelightProcessingModule(limelight, telemetry);
+        limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
 

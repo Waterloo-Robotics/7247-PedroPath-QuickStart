@@ -1,16 +1,11 @@
 package org.firstinspires.ftc.teamcode.Modules;
 
-import static org.firstinspires.ftc.teamcode.WlooConstants.turret_heading;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.WlooConstants;
 
 public class TurretModule {
     private Servo homing_servo;
@@ -20,8 +15,6 @@ public class TurretModule {
     public ElapsedTime homing_timer = new ElapsedTime();
     private boolean homing_timer_started = false;
     private DcMotorEx turret_motor;
-    private DesiredAngleModule desiredAngleModule;
-    public static double angle;
 
     public ModuleStates current_state = ModuleStates.UNKNOWN;
     public boolean home_found = false;
@@ -45,16 +38,14 @@ public class TurretModule {
         BACKWARD,
         LEFT,
         RIGHT,
-        ACTIVE,
-        RUNNING;
+        ACTIVE;
     }
 
-    public TurretModule(Servo homing_servo, DcMotor turret_motor, DesiredAngleModule desiredAngleModule)
+    public TurretModule(Servo homing_servo, DcMotor turret_motor)
     {
         this.homing_servo = homing_servo;
         this.turret_motor = (DcMotorEx) turret_motor;
         this.turret_controller.set_acceleration_limit(0.2);
-        this.desiredAngleModule = desiredAngleModule;
     }
 
     public void home_turret()
@@ -88,11 +79,6 @@ public class TurretModule {
     public void go_left()
     {
         this.current_state = ModuleStates.LEFT;
-    }
-
-    public void go_active()
-    {
-        this.current_state = ModuleStates.RUNNING;
     }
 
     public void update()
@@ -176,24 +162,6 @@ public class TurretModule {
                 if (this.home_found)
                 {
                     this.target_position = RIGHT_POSITION;
-                    drive_to_target();
-                }
-                break;
-
-            case ACTIVE:
-                if (this.home_found)
-                {
-                    this.target_position = turret_heading;
-                    drive_to_target();
-                }
-                break;
-            case RUNNING:
-                if (this.home_found)
-                {
-                   angle = desiredAngleModule.estimate_desired_angle( new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading));
-                    this.target_position = desiredAngleModule.loop(angle);
-
-
                     drive_to_target();
                 }
                 break;

@@ -44,8 +44,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         super.init();
 
         drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint);
-        desiredAngleModule = new DesiredAngleModule(false);
-        turretModule = new TurretModule(linearServo, turretRotation, desiredAngleModule);
+        turretModule = new TurretModule(linearServo, turretRotation);
 
         // Modules
         flywheelControl = new flywheelModule(flywheel);
@@ -55,9 +54,9 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
+        desiredAngleModule = new DesiredAngleModule(false);
 
-
-        panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getPEDRO_PATHING());
+        panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -80,10 +79,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         }else if(gamepad2.dpadRightWasPressed())
         {
             turretModule.go_right();
-        }/*else if(gamepad2.rightStickButtonWasPressed())
-        {
-            turretModule.go_active();
-        }*/
+        }
         turretModule.update();
 //        if(hoodPosition <= .4){
 //            hoodPosition = .4;
@@ -214,8 +210,6 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
 
         Pose2D fixedPosition = new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading);
         double angle_deg = desiredAngleModule.estimate_desired_angle(fixedPosition);
-        desiredAngleModule.loop(angle_deg);
-
 
         updatePanels(new Pose(fixedPosition.getX(DistanceUnit.INCH),
                               fixedPosition.getY(DistanceUnit.INCH),
@@ -241,9 +235,6 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         telemetry.addData("Hood Pos", hood.getPosition());
         telemetry.addData("AutoTargeting",AutoTargeting);
         telemetry.addData("Artifacts Deletected", indexerModule.num_artifacts);
-        telemetry.addData("turret_heading", WlooConstants.turret_heading);
-        telemetry.addData("Angle", TurretModule.angle);
-
         telemetry.update();
     }
 
