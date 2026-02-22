@@ -60,7 +60,7 @@ public class Score_Red_Close extends WlooOpmode {
 
 
     public void flywheel_on(){
-        flywheelRPM = -1000;
+        flywheelRPM = -2800;
     }
     public void flywheel_off(){
         flywheelRPM = 0;
@@ -77,7 +77,7 @@ public class Score_Red_Close extends WlooOpmode {
 //    public void shootPURPLE(){
 //        indexerModule.shootPurple();
 //    }
-    public void hoodUP() {hoodPosition = 0.1; };
+    public void hoodUP() {hoodPosition = 0.782; };
     public void setCallbackran(){
         callbackran = true;
     }
