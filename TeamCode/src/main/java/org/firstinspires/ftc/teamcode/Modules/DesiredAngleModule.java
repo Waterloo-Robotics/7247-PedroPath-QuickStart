@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.Modules;
 
+import static org.firstinspires.ftc.teamcode.WlooConstants.robot_heading;
+
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.WlooConstants;
 
 public class DesiredAngleModule {
     /* Purpose of this file
@@ -17,7 +20,8 @@ public class DesiredAngleModule {
 
 
     private boolean on_red_side;
-    double DesiredAngle;
+
+    static double DesiredAngle;
     public DesiredAngleModule(boolean on_red_side)
     {
         this.on_red_side = on_red_side;
@@ -26,7 +30,7 @@ public class DesiredAngleModule {
 
     public double estimate_desired_angle(Pose2D robot_position) {
 
-        if (on_red_side) {
+        /*if (on_red_side) {
             double x = robot_position.getX(DistanceUnit.INCH) + 58.3727;
             double y = robot_position.getY(DistanceUnit.INCH) - 55.6425;
             DesiredAngle = Math.atan2(y, x);
@@ -36,7 +40,38 @@ public class DesiredAngleModule {
             double x = robot_position.getX(DistanceUnit.INCH) + 58.3727;
             double y = robot_position.getY(DistanceUnit.INCH) + 55.6425;
             DesiredAngle = Math.atan2(y, x);
+        }*/
+
+        if (!on_red_side) {
+            double x = robot_position.getX(DistanceUnit.INCH) - 12;
+            double y = robot_position.getY(DistanceUnit.INCH) - 132;
+            double no90;
+            no90 = Math.atan2(y, x);
+            DesiredAngle = Math.atan((90) +no90);
+
+        }/*else {
+            double x = robot_position.getX(DistanceUnit.INCH) + 58.3727;
+            double y = robot_position.getY(DistanceUnit.INCH) - 55.6425;
+            DesiredAngle = Math.atan2(y, x);
+
+        }*/
+
+        if (DesiredAngle>Math.PI){
+            DesiredAngle = Math.PI;
+        }
+        if(DesiredAngle< 0){
+            DesiredAngle = 0;
         }
         return Math.toDegrees(DesiredAngle) + 180;
+
+
+
     }
-}
+
+
+    public double loop(double IdontcareRN) {
+
+        return  ( (693.0 - (-100.0) / (0.0 - 180.0) ) * (((IdontcareRN-robot_heading) - 180.0) + -100.0));
+
+
+}}
