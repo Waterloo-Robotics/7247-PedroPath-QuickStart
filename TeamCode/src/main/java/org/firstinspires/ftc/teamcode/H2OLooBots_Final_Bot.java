@@ -45,6 +45,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
     @Override
     public void init() {
         super.init();
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setOffsets(6.6318, 0, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
