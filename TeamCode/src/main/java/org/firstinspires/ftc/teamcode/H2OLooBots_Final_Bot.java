@@ -154,8 +154,10 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
 
         if (gamepad1.options) {
             pinpoint.update();
-            pinpoint.resetPosAndIMU();
+//            pinpoint.resetPosAndIMU();
+            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH,61.7,61.8, AngleUnit.DEGREES, 0));
         }
+
 
         flywheelRPM += gamepad2.right_trigger * 50;
         flywheelRPM -= gamepad2.left_trigger * 50;
