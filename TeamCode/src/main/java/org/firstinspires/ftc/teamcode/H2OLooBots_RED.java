@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.geometry.CoordinateSystem;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -13,16 +11,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Modules.DesiredAngleModule;
 import org.firstinspires.ftc.teamcode.Modules.FCDrivebaseModule;
 import org.firstinspires.ftc.teamcode.Modules.IndexerModule;
 import org.firstinspires.ftc.teamcode.Modules.LimelightProcessingModule;
 import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.TurretModule;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
-import org.firstinspires.ftc.teamcode.Modules.DesiredAngleModule;
 
-@TeleOp(name="H2OLooBots_Final_Bot", group="LinearOpMode")
-public class H2OLooBots_Final_Bot extends WlooOpmode {
+@TeleOp(name="H2OLooBots_RED", group="LinearOpMode")
+public class H2OLooBots_RED extends WlooOpmode {
 
     private flywheelModule flywheelControl;
     private LimelightProcessingModule llModule;
@@ -60,7 +58,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
-        desiredAngleModule = new DesiredAngleModule(false);
+        desiredAngleModule = new DesiredAngleModule(true);
 
         /* If the pinpoint position is greater than 10, it's likely that we ran an auto */
         if ((pinpoint.getPosX(DistanceUnit.INCH) > 10) && (pinpoint.getPosY(DistanceUnit.INCH) > 10))
@@ -73,20 +71,17 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
 
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
+        turretModule.home_turret();
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
     @Override
     public void init_loop() {
-        if (gamepad1.dpadRightWasPressed())
-        {
-            desiredAngleModule.on_red_side = true;
-        }
-        else if (gamepad1.dpadLeftWasPressed())
-        {
-            desiredAngleModule.on_red_side = false;
-        }
+
+        desiredAngleModule.on_red_side = true;
+
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
         telemetry.update();
@@ -155,7 +150,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         if (gamepad1.options) {
             pinpoint.update();
 //            pinpoint.resetPosAndIMU();
-            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH,61.7,61.8, AngleUnit.DEGREES, 0));
+            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH,56.3,61.8, AngleUnit.DEGREES, 0));
         }
 
 
@@ -287,6 +282,7 @@ public class H2OLooBots_Final_Bot extends WlooOpmode {
         telemetry.addData("Y:", pinpoint.getPosY(DistanceUnit.INCH));
         telemetry.addData("Desired Turret Angle Field", desired_turret_angle_field);
         telemetry.addData("Desired Turret Angle Robot", turretModule.target_position);
+        telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
         telemetry.update();
     }
 
