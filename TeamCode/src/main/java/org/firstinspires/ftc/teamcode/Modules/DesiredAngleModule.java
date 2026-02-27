@@ -26,13 +26,13 @@ public class DesiredAngleModule {
 
     public double estimate_desired_angle(Pose2D robot_position) {
 
-        if (on_red_side) {
+        if (this.on_red_side) {
             double x = robot_position.getX(DistanceUnit.INCH) + 58.3727;
             double y = robot_position.getY(DistanceUnit.INCH) - 55.6425;
             DesiredAngle = Math.atan2(y, x);
         }
 
-        if(!on_red_side){
+        if(!this.on_red_side){
             double x = robot_position.getX(DistanceUnit.INCH) + 58.3727;
             double y = robot_position.getY(DistanceUnit.INCH) + 55.6425;
             DesiredAngle = Math.atan2(y, x);

@@ -58,7 +58,7 @@ public class H2OLooBots_RED extends WlooOpmode {
         limelight.start();
 
         indexerModule = new IndexerModule(ball1, color1a, color1b, ball2, color2a, color2b, ball3, color3a, color3b, light1);
-        desiredAngleModule = new DesiredAngleModule(true);
+        desiredAngleModule = new DesiredAngleModule(false);
 
         /* If the pinpoint position is greater than 10, it's likely that we ran an auto */
         if ((pinpoint.getPosX(DistanceUnit.INCH) > 10) && (pinpoint.getPosY(DistanceUnit.INCH) > 10))
@@ -72,18 +72,10 @@ public class H2OLooBots_RED extends WlooOpmode {
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
         turretModule.home_turret();
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-    }
-
-    @Override
-    public void init_loop() {
-
         desiredAngleModule.on_red_side = true;
 
+
         telemetry.addData("Status", "Initialized");
-        telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
         telemetry.update();
     }
 
@@ -150,7 +142,7 @@ public class H2OLooBots_RED extends WlooOpmode {
         if (gamepad1.options) {
             pinpoint.update();
 //            pinpoint.resetPosAndIMU();
-            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH,56.3,61.8, AngleUnit.DEGREES, 0));
+            pinpoint.setPosition(new Pose2D(DistanceUnit.INCH,62.5,-60.9, AngleUnit.DEGREES, 0));
         }
 
 
@@ -240,7 +232,7 @@ public class H2OLooBots_RED extends WlooOpmode {
 
         /* 0 Degrees is pointing at the audience, with counter-clockwise as positive */
         /* Say our robot angle is 90 degrees, our desired turret angle is 135
-        * desired_turret_angle_field - robot_heading */
+         * desired_turret_angle_field - robot_heading */
 //        Pose2D fixedPosition = new Pose2D(DistanceUnit.INCH, WlooConstants.robot_x, WlooConstants.robot_y, AngleUnit.DEGREES, WlooConstants.robot_heading);
         Pose2D fixedPosition = pinpoint.getPosition();
         double desired_turret_angle_field = desiredAngleModule.estimate_desired_angle(fixedPosition);
@@ -255,8 +247,8 @@ public class H2OLooBots_RED extends WlooOpmode {
         turretModule.set_desired_turret_angle(desired_turret_angle_robot);
 
         updatePanels(new Pose(fixedPosition.getX(DistanceUnit.INCH),
-                              fixedPosition.getY(DistanceUnit.INCH),
-                              fixedPosition.getHeading(AngleUnit.RADIANS)),
+                        fixedPosition.getY(DistanceUnit.INCH),
+                        fixedPosition.getHeading(AngleUnit.RADIANS)),
                 desired_turret_angle_field);
 
         /* ---------------- LIMELIGHT TELEMETRY ---------------- */
@@ -283,6 +275,7 @@ public class H2OLooBots_RED extends WlooOpmode {
         telemetry.addData("Desired Turret Angle Field", desired_turret_angle_field);
         telemetry.addData("Desired Turret Angle Robot", turretModule.target_position);
         telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
+
         telemetry.update();
     }
 

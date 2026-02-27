@@ -285,6 +285,7 @@ public class H2OLooBots_Drive_Practice extends WlooOpmode {
         telemetry.addData("Y:", pinpoint.getPosY(DistanceUnit.INCH));
         telemetry.addData("Desired Turret Angle Field", desired_turret_angle_field);
         telemetry.addData("Desired Turret Angle Robot", turretModule.target_position);
+        telemetry.addData("Limelight Distance", limelight_distance);
         telemetry.update();
     }
 

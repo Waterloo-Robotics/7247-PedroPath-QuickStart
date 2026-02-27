@@ -72,18 +72,10 @@ public class H2OLooBots_BLUE extends WlooOpmode {
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getDEFAULT_FTC());
 
         turretModule.home_turret();
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-    }
-
-    @Override
-    public void init_loop() {
-
         desiredAngleModule.on_red_side = false;
 
+
         telemetry.addData("Status", "Initialized");
-        telemetry.addData("Alliance (On Red)", desiredAngleModule.on_red_side);
         telemetry.update();
     }
 
