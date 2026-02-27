@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class TurretModule {
     private Servo homing_servo;
-    private final static double HOMING_SERVO_UP = 0.7;
+    public final static double HOMING_SERVO_UP = 0.7;
     private final static double HOMING_SERVO_DOWN = 0.4;
     public ElapsedTime homing_servo_timer = new ElapsedTime();
     public ElapsedTime homing_timer = new ElapsedTime();
