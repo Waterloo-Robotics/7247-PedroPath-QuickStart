@@ -12,19 +12,34 @@ public class FCDrivebaseModule {
     private DcMotor frontLeft;
     private DcMotor frontRight;
 
+    Boolean on_red_side;
+
     GoBildaPinpointDriver pinpoint;
-    public FCDrivebaseModule(DcMotor backLeft, DcMotor backRight, DcMotor frontLeft, DcMotor frontRight, GoBildaPinpointDriver pinpoint)
+    public FCDrivebaseModule(DcMotor backLeft, DcMotor backRight, DcMotor frontLeft, DcMotor frontRight, GoBildaPinpointDriver pinpoint, Boolean on_red_side)
     {
-    this.pinpoint = pinpoint;
+        this.pinpoint = pinpoint;
         this.frontLeft = frontLeft;
         this.frontRight = frontRight;
         this.backLeft = backLeft;
         this.backRight = backRight;
+        this.on_red_side = on_red_side;
     }
 
     public void update_Drive(double x, double y, double turn)
     {
-        double botHeading = this.pinpoint.getHeading(AngleUnit.RADIANS) + (Math.PI/2);  //=0 ODO IMU
+        /* Since the coordinate system present in the Pinpoint is the fixed FTC coordinate system,
+           the heading will be the exact same if we're on Red or Blue alliance. In order for field
+           centric to work, the heading used for the drivebase needs to be 180 degrees
+           offset from each other. */
+        double botHeading;
+        if (this.on_red_side)
+        {
+            botHeading = this.pinpoint.getHeading(AngleUnit.RADIANS) - (Math.PI/2);  //=0 ODO IMU
+        }
+        else
+        {
+            botHeading = this.pinpoint.getHeading(AngleUnit.RADIANS) + (Math.PI/2);  //=0 ODO IMU
+        }
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);

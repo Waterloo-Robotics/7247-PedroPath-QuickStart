@@ -47,7 +47,7 @@ public class H2OLooBots_RED extends WlooOpmode {
         pinpoint.setOffsets(6.6318, 0, DistanceUnit.INCH);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-        drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint);
+        drivebase = new FCDrivebaseModule(backLeft, backRight, frontLeft, frontRight, pinpoint, true);
         turretModule = new TurretModule(linearServo, turretRotation);
 
         // Modules
