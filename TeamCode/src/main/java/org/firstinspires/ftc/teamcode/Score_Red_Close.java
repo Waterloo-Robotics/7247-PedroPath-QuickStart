@@ -202,8 +202,16 @@ public class Score_Red_Close extends WlooOpmode {
                 if (!follower.isBusy() && counter > 100) {
                     follower.followPath(pickup1startPath);
                     flywheel_off();
+                    setPathState(4);
                 }
                 break;
+            case 4:
+                if (!follower.isBusy() && counter > 100) {
+                    flywheel_off();
+                }
+                break;
+
+
 //
 //            case 2:
 //                if (!follower.isBusy()  /*&& counter > */ ) {

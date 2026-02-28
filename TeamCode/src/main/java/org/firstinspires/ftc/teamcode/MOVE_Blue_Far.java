@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "SCORE BLUE FAR", group = "Examples")
+@Autonomous(name = "MOVE BLUE FAR", group = "Examples")
 public class MOVE_Blue_Far extends WlooOpmode {
     private flywheelModule flywheelControl;
     private LimelightProcessingModule llModule;

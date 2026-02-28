@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.Modules.Table2D;
 import org.firstinspires.ftc.teamcode.Modules.flywheelModule;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "SCORE BLUE CLOSE", group = "Examples")
+@Autonomous(name = "SCORE BLUE FAR", group = "Examples")
 public class Score_Blue_Far extends WlooOpmode {
 
 
@@ -68,8 +68,8 @@ public class Score_Blue_Far extends WlooOpmode {
     private int pathState = -1;
     int counter;
     private final Pose startPose = new Pose(60, 8, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose shoot1 = new Pose(59, 83, Math.toRadians(315));  // shooting preload
-    private final Pose pickup1start = new Pose(36, 18, Math.toRadians(180));  // pick up 1st row start
+    private final Pose shoot1 = new Pose(59, 8, Math.toRadians(292));  // shooting preload
+    private final Pose pickup1start = new Pose(36, 10, Math.toRadians(180));  // pick up 1st row start
     private final Pose pickup1end = new Pose(129, 35, Math.toRadians(0));  // picking up 1st row end
     private final Pose shoot2stall = new Pose(85, 50, Math.toRadians(0));  // shooting preload
     private final Pose shoot2 = new Pose(83, 83, Math.toRadians(45));  // shooting first row
@@ -86,7 +86,7 @@ public class Score_Blue_Far extends WlooOpmode {
 
 
     public void flywheel_on(){
-        flywheelRPM = 2100;
+        flywheelRPM = 3450;
 
     }
     public void flywheel_off(){
@@ -104,7 +104,7 @@ public class Score_Blue_Far extends WlooOpmode {
 //    public void shootPURPLE(){
 //        indexerModule.shootPurple();
 //    }
-    public void hoodUP() {hoodPosition = 0.782; };
+    public void hoodUP() {hoodPosition = 0; };
     public void setCallbackran(){
         callbackran = true;
     }
@@ -199,10 +199,19 @@ public class Score_Blue_Far extends WlooOpmode {
 
                 break;
             case 3:
-                if (!follower.isBusy() && counter > 100) {
+                if (!follower.isBusy() && counter > 150) {
                     follower.followPath(pickup1startPath);
+                    setPathState(4);
                     flywheel_off();
                 }
+                break;
+
+            case 4:
+                if(counter > 75){
+                    flywheel_off();
+
+                }
+
                 break;
 //
 //            case 2:

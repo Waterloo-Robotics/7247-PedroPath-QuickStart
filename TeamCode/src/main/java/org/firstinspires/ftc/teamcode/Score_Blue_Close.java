@@ -87,7 +87,6 @@ public class Score_Blue_Close extends WlooOpmode {
 
     public void flywheel_on(){
         flywheelRPM = 2100;
-
     }
     public void flywheel_off(){
         flywheelRPM = 0;
@@ -201,8 +200,17 @@ public class Score_Blue_Close extends WlooOpmode {
             case 3:
                 if (!follower.isBusy() && counter > 100) {
                     follower.followPath(pickup1startPath);
+                    setPathState(4);
                     flywheel_off();
                 }
+                break;
+
+            case 4:
+                if(counter > 75){
+                    flywheel_off();
+
+                }
+
                 break;
 //
 //            case 2:
